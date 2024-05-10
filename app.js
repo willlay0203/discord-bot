@@ -1,8 +1,6 @@
-// Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits} = require('discord.js');
 require('dotenv').config()
-
-//db
+// Require the necessary discord.js classes
+const { Client, Events, GatewayIntentBits, Collection} = require('discord.js');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -14,7 +12,6 @@ const db = new MongoClient(process.env.DB_URI, {
     }
 });
 
-// Create a new client instance
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent,GatewayIntentBits.GuildVoiceStates] });
 
 bot.once(Events.ClientReady, readyClient => {
@@ -41,9 +38,11 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 bot.on("messageCreate", (message) => {
     const commandRegex = /^![^\s]+/; 
     const command = message.content.match(commandRegex)
-    if (command) {
+    const test = require('./commands/points.js')
+    test()
+    // if (command) {
 
-    }
+    // }
 })
 
 async function addPoints(points, member) {
@@ -62,3 +61,5 @@ async function addPoints(points, member) {
 }
 
 bot.login(process.env.BOT_TOKEN);
+
+module.exports = db;
