@@ -38,6 +38,14 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     }    
 })
 
+bot.on("messageCreate", (message) => {
+    const commandRegex = /^![^\s]+/; 
+    const command = message.content.match(commandRegex)
+    if (command) {
+
+    }
+})
+
 async function addPoints(points, member) {
     try {
         // Check if the user exists in the database
