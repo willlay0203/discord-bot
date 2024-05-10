@@ -40,7 +40,9 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 
 async function addPoints(points, member) {
     try {
-    // Check if the user exists in the database
+        await client.connect();
+
+        // Check if the user exists in the database
         db.db("points-db").collection("Users").findOneAndUpdate(
             { id: member.id },
             { $inc: {points: points }, $set: {displayName: member.user.displayName}},
@@ -48,7 +50,8 @@ async function addPoints(points, member) {
         );
     } catch (error) {
         console.error("error updating");
-        db.close()
+    } finally {
+        await db.close();
     }
 }
 
