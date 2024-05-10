@@ -48,11 +48,12 @@ bot.on("messageCreate", (message) => {
 async function addPoints(points, member) {
     try {
         // Check if the user exists in the database
-        db.db("points-db").collection("Users").findOneAndUpdate(
+        const res = await db.db("points-db").collection("Users").findOneAndUpdate(
             { id: member.id },
             { $inc: {points: points }, $set: {displayName: member.user.displayName}},
-            { returnDocument: false, upsert: true}
+            { returnDocument: 'after', upsert: true}
         );
+        console.log(`Added ${points} points to ${res.displayName}`);
     } catch (error) {
         console.error("error updating");
     } finally {
