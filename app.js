@@ -44,9 +44,9 @@ async function addPoints(points, member) {
         const res = await db.db("points-db").collection("Users").findOneAndUpdate(
             { id: member.id },
             { $inc: {points: points }, $set: {displayName: member.user.displayName}},
-            { returnDocument: false, upsert: true}
+            { returnDocument: 'after', upsert: true}
         );
-        console.log("Added" + points + " to" + res.displayName)
+        console.log(`Added ${points} points to ${res.displayName}`);
     } catch (error) {
         console.error("error updating");
     } finally {
