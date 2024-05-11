@@ -1,10 +1,11 @@
-require('dotenv').config()
-// Require the necessary discord.js classes
-const { Client, Events, GatewayIntentBits, Collection} = require('discord.js');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+import dotenv from 'dotenv';
+import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
+import { MongoClient, ServerApiVersion } from 'mongodb';
+import points from './commands/points.js';
 
+dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const db = new MongoClient(process.env.DB_URI, {
+export const db = new MongoClient(process.env.DB_URI, {
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,
@@ -28,7 +29,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
         console.log(member.user.displayName + " joined a channel");
         users.set(member.id, new Date().getTime());
     } else {
-        // Member left the channel
+        // Member left the chanel
         console.log(member.user.displayName + " left a channel");
         const points = Math.floor((new Date().getTime() - users.get(member.id)) / 1000); // in seconds
         addPoints(points, member);
@@ -38,14 +39,11 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 bot.on("messageCreate", (message) => {
     const commandRegex = /^![^\s]+/; 
     const command = message.content.match(commandRegex)
-    const test = require('./commands/points.js')
-    test()
-    // if (command) {
-
-    // }
+    
+    if (command == "!points") { points(message)};
 })
 
-async function addPoints(points, member) {
+const addPoints = async (points, member) => {
     try {
         // Check if the user exists in the database
         const res = await db.db("points-db").collection("Users").findOneAndUpdate(
@@ -56,11 +54,7 @@ async function addPoints(points, member) {
         console.log(`Added ${points} points to ${res.displayName}`);
     } catch (error) {
         console.error("error updating");
-    } finally {
-        await db.close();
     }
 }
 
 bot.login(process.env.BOT_TOKEN);
-
-module.exports = db;

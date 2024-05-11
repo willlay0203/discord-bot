@@ -1,22 +1,30 @@
-require('dotenv').config()
+import {db} from "../app.js";
+import { bold } from 'discord.js';
+import dotenv from 'dotenv';
+
 
 /**
- * This command lists a sorted list of everyone's points
+ * This command sends a sorted list of everyone
  * @param {string} message 
- * @param {*} command 
  */
+export const points = async (message) => {
+    const users = await getAllUsers();
+    
+    let msg = `${bold("Petar Points ranking")}\n`;
 
-const db = require('../app.js')
+    users.forEach((user, index) => {
+        msg += `${index + 1}: ${bold(user.displayName)}: ${user.points}\n`;
+    });
 
-const points = () => {
-    try {
-        const res = db.db("points-db").collection("Users").find();
-        console.log(res)
-    } catch (error) {
-        console.error("error updating");
-    } finally {
-      db.close();
-    }
+    message.channel.send(msg)
 }
 
-module.exports = points;
+const getAllUsers = async () => {
+    const res = await db.db("points-db").collection("Users").find(
+        {}, {sort: {points: -1}}
+    );
+
+    return await res.toArray();
+}
+
+export default points;
