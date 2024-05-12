@@ -22,18 +22,22 @@ bot.once(Events.ClientReady, readyClient => {
 let users = new Map();
 
 bot.on('voiceStateUpdate', (oldState, newState) => {
-    const member = oldState.member || newState.member;
-    
-    // If the member was not in a channel before
+    let member = oldState.member || newState.member;
+    let currTime = new Date().getTime();
+
     if (oldState.channel === null) {
+        // If the member just joined a channel
         console.log(member.user.displayName + " joined a channel");
-        users.set(member.id, new Date().getTime());
-    } else {
-        // Member left the chanel
-        console.log(member.user.displayName + " left a channel");
-        const points = Math.floor((new Date().getTime() - users.get(member.id)) / 1000); // in seconds
-        addPoints(points, member);
-    }    
+        users.set(member.id, currTime);
+    } else if (newState.channel === null || member.voice.deaf || member.voice.mute) {
+        // Member left the channel or goes on mute/deafen 
+        console.log(member.user.displayName + " has left/muted/deafened");
+        addPoints(currTime, member);
+    } else if (oldState.channel == newState.channel && !oldState.member.voice.streaming && newState.member.streaming) {
+        // If the member has just unmuted or undeafened
+        console.log(`${member.user.displayName} moved channels or has stop or started streaming`);
+        users.set(member.id, currTime);
+    }
 })
 
 bot.on("messageCreate", (message) => {
@@ -43,7 +47,9 @@ bot.on("messageCreate", (message) => {
     if (command == "!points") { points(message)};
 })
 
-const addPoints = async (points, member) => {
+const addPoints = async (currTime, member) => {
+    // 10 points per minute
+    const points = Math.floor(((currTime - users.get(member.id)) / 1000) / 60) * 10;
     try {
         // Check if the user exists in the database
         const res = await db.db("points-db").collection("Users").findOneAndUpdate(
