@@ -25,19 +25,12 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     let member = oldState.member || newState.member;
     let currTime = new Date().getTime();
 
-    if (oldState.channel === null) {
-        // If the member just joined a channel
-        console.log(member.user.displayName + " joined a channel");
-        users.set(member.id, currTime);
-    } else if (newState.channel === null || member.voice.deaf || member.voice.mute) {
+    if (newState.channel === null || member.voice.deaf || member.voice.mute) {
         // Member left the channel or goes on mute/deafen 
         console.log(member.user.displayName + " has left/muted/deafened");
         addPoints(currTime, member);
-    } else if (oldState.channel == newState.channel && !oldState.member.voice.streaming && newState.member.streaming) {
-        // If the member has just unmuted or undeafened
-        console.log(`${member.user.displayName} moved channels or has stop or started streaming`);
-        users.set(member.id, currTime);
     }
+    users.set(member.id, currTime);
 })
 
 bot.on("messageCreate", (message) => {
