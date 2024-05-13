@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import points from './commands/points.js';
-
+import addPoints from './lib/addPoints.js';
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 export const db = new MongoClient(process.env.DB_URI, {
@@ -32,7 +32,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     // Member left the channel or goes on mute/deafen 
     if (newState.channel === null || member.voice.deaf || member.voice.mute) {
         console.log(member.user.displayName + " has left/muted/deafened");
-        addPoints(currTime, member);
+        addPoints(currTime, member, users);
     }
     users.set(member.id, currTime);
 })
@@ -43,26 +43,5 @@ bot.on("messageCreate", (message) => {
     
     if (command == "!points") { points(message)};
 })
-
-const addPoints = async (currTime, member) => {
-    // 10 points per minute
-    const points = Math.floor(((currTime - users.get(member.id)) / 1000) / 60) * 10;
-    try {
-        // Check if the user exists in the database
-        const user = await db.db("points-db").collection("Users").findOne({_id: member.id});
-        
-        if (user === null) {
-            db.db("points-db").collection("Users").insertOne({_id: member.id, displayName: member.user.displayName, points: points});
-        } else {
-            db.db("points-db").collection("Users").updateOne(
-                { _id: member.id },
-                { $inc: {points: points }}
-            )
-        }
-        console.log(`Added ${points} points to ${member.user.displayName}`);
-    } catch (error) {
-        console.log(error)
-    }
-}
 
 bot.login(process.env.BOT_TOKEN);
