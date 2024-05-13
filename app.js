@@ -13,7 +13,7 @@ export const db = new MongoClient(process.env.DB_URI, {
     }
 });
 
-const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent,GatewayIntentBits.GuildVoiceStates] });
+export const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent,GatewayIntentBits.GuildVoiceStates] });
 
 bot.once(Events.ClientReady, readyClient => {
 	console.log(`Bot is in! Logged in as ${readyClient.user.tag}`);
