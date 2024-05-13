@@ -1,6 +1,6 @@
 import addPoints from '../lib/addPoints'
 import { MongoClient, ServerApiVersion } from 'mongodb';
-const db = new MongoClient(process.env.DB_URI);
+import {db} from "../app.js";
 
 let users = new Map();
 
