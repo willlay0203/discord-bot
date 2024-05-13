@@ -25,6 +25,9 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     let member = oldState.member || newState.member;
     let currTime = new Date().getTime();
 
+    if (users.get(member.id) == null) {
+        users.set(member.id, currTime);
+    }
     console.log(`Starting count for user ${member.user.displayName}`);
     // Member left the channel or goes on mute/deafen 
     if (newState.channel === null || member.voice.deaf || member.voice.mute) {
