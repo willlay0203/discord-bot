@@ -28,13 +28,18 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     if (users.get(member.id) == null) {
         users.set(member.id, currTime);
     }
-    console.log(`Starting count for user ${member.user.displayName}`);
-    // Member left the channel or goes on mute/deafen 
+
+    // If user joins a channel or goes on mute and deafen
     if (newState.channel === null || member.voice.deaf || member.voice.mute) {
-        console.log(member.user.displayName + " has left/muted/deafened");
-        addPoints(currTime, member);
+        // Checks if you joined muted/deafened
+        if (oldState.channel != null) {
+            console.log(member.user.displayName + " has left or gone on muted/deafened");
+            addPoints(currTime, member);
+        }
+    } else {
+        console.log(`Starting count for user ${member.user.displayName}`);
+        users.set(member.id, currTime);
     }
-    users.set(member.id, currTime);
 })
 
 bot.on("messageCreate", (message) => {
