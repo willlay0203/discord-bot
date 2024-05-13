@@ -1,3 +1,1 @@
 # discord-bot
-
-testing rule
