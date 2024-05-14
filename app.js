@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import points from './commands/points.js';
+import isInLeagueGame from './commands/gamble.js'
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -47,6 +48,9 @@ bot.on("messageCreate", (message) => {
     const command = message.content.match(commandRegex)
     
     if (command == "!points") { points(message)};
+
+    if (command == "!ingame") { isInLeagueGame(message);}
+
 })
 
 const addPoints = async (currTime, member) => {
