@@ -61,7 +61,10 @@ export const isInLeagueGame = async() => {
         const userData = grabParticipantData(id, data);
         const userName = userData.riotId;
 
-        const msg = `Username: ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameLength}`
+        const gameMinutes = Math.floor(gameLength / 60)
+        const gameSeconds = gameLength - gameMinutes * 60
+
+        const msg = `Username: ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameMinutes} minutes and ${gameSeconds} seconds`
         msgTestChannel(msg);
 
     } catch(error) {
