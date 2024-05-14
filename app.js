@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
-import points from './commands/points.js';
+import getPoints from './commands/getPoints.js';
+import addTimePoints from './utils/points.js';
+import createEmbed from './features/treasure.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,7 +36,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
         // Checks if you joined muted/deafened
         if (oldState.channel != null) {
             console.log(member.user.displayName + " has left or gone on muted/deafened");
-            addPoints(currTime, member);
+            addTimePoints(currTime, member);
         }
     } else {
         console.log(`Starting count for user ${member.user.displayName}`);
@@ -46,28 +48,20 @@ bot.on("messageCreate", (message) => {
     const commandRegex = /^![^\s]+/; 
     const command = message.content.match(commandRegex)
     
-    if (command == "!points") { points(message)};
+    if (command == "!points") { getPoints(message) };
 })
 
-const addPoints = async (currTime, member) => {
-    // 10 points per minute
-    const points = Math.floor(((currTime - users.get(member.id)) / 1000) / 60) * 10;
-    try {
-        // Check if the user exists in the database
-        const user = await db.db("points-db").collection("Users").findOne({_id: member.id});
-        
-        if (user === null) {
-            db.db("points-db").collection("Users").insertOne({_id: member.id, displayName: member.user.displayName, points: points});
-        } else {
-            db.db("points-db").collection("Users").updateOne(
-                { _id: member.id },
-                { $inc: {points: points }}
-            )
-        }
-        console.log(`Added ${points} points to ${member.user.displayName}`);
-    } catch (error) {
-        console.log(error)
-    }
-}
+setInterval(() => {
+    createEmbed();
+}, 5000)
 
-bot.login(process.env.BOT_TOKEN);
+bot.on("interactionCreate", (interaction) => {
+    if (interaction.customId === "treasureButton") {
+        let user = interaction.member.user.displayName;
+        interaction.message.delete()
+        interaction.message.channel.send(`${user} collected `)
+        // user id = interaction.member.user.id
+    }
+})
+
+bot.login(process.env.TEST_BOT_TOKEN);
