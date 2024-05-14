@@ -8,11 +8,14 @@ const LOL_API_KEY = process.env.LOL_API_TOKEN
 const REGION_URL = 'https://asia.api.riotgames.com'
 const MATCH_REGION_URL = 'https://oc1.api.riotgames.com'
 
+/** To be moved to separate file later
+*/
+const harry = 'darkhunter360'
+
 /** Grab PUUID for given summoner name + tag (ie steven#OCE)
 */
-const getID = async () => {
-    const requestUrl = `${REGION_URL}/riot/account/v1/accounts/by-riot-id/proxysinged/oce?api_key=${LOL_API_KEY}`;
-
+const getID = async (name, tag) => {
+    const requestUrl = `${REGION_URL}/riot/account/v1/accounts/by-riot-id/${name}/${tag}?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
 
@@ -22,8 +25,7 @@ const getID = async () => {
         
         const data = await response.json();
         const puuid = data.puuid;
-        console.log(data)
-        msgTestChannel(puuid);
+        return puuid;
 
     } catch(error) {
         console.error("Error:", error);
@@ -42,7 +44,7 @@ const grabParticipantData = (puuid, data) => {
 /** Check if a given user is currently in a League match
 */
 export const isInLeagueGame = async() => {
-    const id = "W3XPSvMu8iGilEb1Jt9-PKPJjHQ_h9OMkIMq8emLCOTrwvpND-trePeBe1kRz1LDYRi-4f74DUPTdw"
+    const id = await getID(harry, 'oce');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
 
     try {
@@ -64,6 +66,7 @@ export const isInLeagueGame = async() => {
 
     } catch(error) {
         console.error("Error:", error);
+        msgTestChannel('User is not in a game!');
     }
 }
 
