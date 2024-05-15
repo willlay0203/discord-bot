@@ -36,7 +36,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
         // Checks if you joined muted/deafened
         if (oldState.channel != null) {
             console.log(member.user.displayName + " has left or gone on muted/deafened");
-            addTimePoints(currTime, member);
+            addTimePoints(currTime, member, users);
         }
     } else {
         console.log(`Starting count for user ${member.user.displayName}`);
