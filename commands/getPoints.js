@@ -1,6 +1,6 @@
 import {db} from "../app.js";
 import { bold } from 'discord.js';
-import { msgDefaultChannel } from "../utils/msg.js";
+import { msgChannel } from "../utils/msg.js";
 
 
 /**
@@ -15,7 +15,7 @@ export const points = async (message) => {
         msg += `${index + 1}: ${bold(user.displayName)}: ${user.points}\n`;
     });
 
-    msgDefaultChannel(msg);
+    msgChannel(msg);
 }
 
 const getAllUsers = async () => {
