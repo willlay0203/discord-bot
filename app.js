@@ -92,9 +92,9 @@ bot.on("interactionCreate", (interaction) => {
         interaction.reply(`${bold(member.user.displayName)} collected ${points}PP`);
         
         // Reset
-        if (treasureEventCounters.remaining == 0) {
+        if (treasureEventCounters.remaining <= 0) {
             interaction.message.delete();
-            treasureEventCounters.remaining = 0;
+            treasureEventCounters.remaining = 2;
             treasureEventCounters.membersClicked = [];
         }
     }
