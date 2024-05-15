@@ -1,6 +1,6 @@
 import {db} from "../app.js";
 import { bold } from 'discord.js';
-import { msgTestChannel } from "../utils/msg.js";
+import { msgChannel } from "../utils/msg.js";
 import dotenv from 'dotenv';
 import players from '../data/players.json' assert { type: 'json' };
 dotenv.config();
@@ -60,7 +60,7 @@ export const isInLeagueGame = async(user) => {
     const id = await findMatchingID(players, user);
 
     if (!id) {
-        msgTestChannel("Invalid username");
+        msgChannel("Invalid username");
         return 0;
     }
     
@@ -71,7 +71,7 @@ export const isInLeagueGame = async(user) => {
 
         if (!response.ok) {
             if (response.status == "404") {
-                msgTestChannel("User is not in a game!");
+                msgChannel("User is not in a game!");
                 return 0;
             }
 
@@ -107,12 +107,12 @@ export const isInLeagueGame = async(user) => {
         }
 
         const msg = `$bold{Username:} ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}`
-        msgTestChannel(msg);
+        msgChannel(msg);
 
     } catch(error) {
         console.error("Error:", error);
         console.log("If 403 unauth check LOL api key")
-        msgTestChannel('oops bug');
+        msgChannel('oops bug');
     }
 }
 
