@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
-import points from './commands/points.js';
+import getPoints from './commands/getPoints.js';
+import addTimePoints, { addPoints } from './utils/points.js';
+import createEmbed from './features/treasure.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,7 +36,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
         // Checks if you joined muted/deafened
         if (oldState.channel != null) {
             console.log(member.user.displayName + " has left or gone on muted/deafened");
-            addPoints(currTime, member);
+            addTimePoints(currTime, member);
         }
     } else {
         console.log(`Starting count for user ${member.user.displayName}`);
@@ -42,32 +44,59 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     }
 })
 
+// This is to run periodic events
+function eventTimer() {
+    const minTime = 1200000; // 20min  
+    const maxTime = 2400000; // 40min 
+    const intervalTime = Math.random() * (maxTime - minTime) + minTime;
+
+    console.log(`Next event in ${(intervalTime / (60 * 1000)).toFixed(2)} minutes`);
+
+    setTimeout(() => {
+        console.log("Treasure event started");
+        createEmbed(); // Start the interval again after sending the message
+      }, intervalTime);
+}
+eventTimer()
+
 bot.on("messageCreate", (message) => {
     const commandRegex = /^![^\s]+/; 
     const command = message.content.match(commandRegex)
     
-    if (command == "!points") { points(message)};
+    if (command == "!points") { getPoints(message) };
 })
 
-const addPoints = async (currTime, member) => {
-    // 10 points per minute
-    const points = Math.floor(((currTime - users.get(member.id)) / 1000) / 60) * 10;
-    try {
-        // Check if the user exists in the database
-        const user = await db.db("points-db").collection("Users").findOne({_id: member.id});
+let treasureEventCounters = {
+    remaining: 2,
+    membersClicked: []
+};
+
+bot.on("interactionCreate", (interaction) => {
+    // Treasure features
+    if (interaction.customId === "treasureButton") {
+        let member = interaction.member;
+        let points = interaction.message.embeds[0].title.match(/CLICK COLLECT TO GET (\d+)PP/)[1];
+
+        if (treasureEventCounters.membersClicked.includes(member.id)) {
+            interaction.reply(`${bold(member.user.displayName)} you've already done it!`);
+            return;
+        };
+
+        //Update the counter
+        treasureEventCounters.remaining -= 1;
+        treasureEventCounters.membersClicked.push(member.id)
+
+        console.log(`${member.user.displayName} has clicked, remaining treasure ${treasureEventCounters.remaining}`);
+        addPoints(parseInt((points)), member);
+        interaction.reply(`${bold(member.user.displayName)} collected ${points}PP`);
         
-        if (user === null) {
-            db.db("points-db").collection("Users").insertOne({_id: member.id, displayName: member.user.displayName, points: points});
-        } else {
-            db.db("points-db").collection("Users").updateOne(
-                { _id: member.id },
-                { $inc: {points: points }}
-            )
+        // Reset
+        if (treasureEventCounters.remaining == 0) {
+            interaction.message.delete();
+            treasureEventCounters.remaining = 0;
+            treasureEventCounters.membersClicked = [];
         }
-        console.log(`Added ${points} points to ${member.user.displayName}`);
-    } catch (error) {
-        console.log(error)
     }
-}
+})
 
 bot.login(process.env.BOT_TOKEN);
