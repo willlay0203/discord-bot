@@ -1,6 +1,6 @@
 import { db } from "../app.js";
 
-export const addTimePoints = (currTime, member) => {
+export const addTimePoints = (currTime, member, users) => {
     // 10 points per minute
     const points = Math.floor(((currTime - users.get(member.id)) / 1000) / 60) * 10;
     postPoints(points, member);
