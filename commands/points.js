@@ -1,6 +1,6 @@
 import {db} from "../app.js";
 import { bold } from 'discord.js';
-import { msgDefaultChannel } from "../lib/msg.js";
+import { msgDefaultChannel } from "../utils/msg.js";
 
 
 /**

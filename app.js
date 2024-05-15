@@ -3,6 +3,7 @@ import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import points from './commands/points.js';
 import isInLeagueGame from './commands/gamble.js'
+import { msgTestChannel } from './utils/msg.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -44,12 +45,26 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 })
 
 bot.on("messageCreate", (message) => {
-    const commandRegex = /^![^\s]+/; 
-    const command = message.content.match(commandRegex)
-    
-    if (command == "!points") { points(message)};
+    const commandRegex = /^!(\w+)\s*(\w+)?/; 
+    const content = message.content.match(commandRegex);
 
-    if (command == "!ingame") { isInLeagueGame(message);}
+    if (content) {
+        const command = content[1];
+        const argument = content[2] || null;
+
+        if (command == "points") { points(message)};
+        
+        if (command == "ingame") { 
+            if (argument == null) {
+                msgTestChannel("Please input a user (ie !ingame harry)");
+            }
+
+            else {
+            isInLeagueGame(argument);
+        }
+
+        }
+    }
 
 })
 
