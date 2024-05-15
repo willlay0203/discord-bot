@@ -55,6 +55,7 @@ function eventTimer() {
     setTimeout(() => {
         console.log("Treasure event started");
         createEmbed(); // Start the interval again after sending the message
+        eventTimer();
       }, intervalTime);
 }
 eventTimer()
