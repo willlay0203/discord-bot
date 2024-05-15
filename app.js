@@ -69,9 +69,9 @@ bot.on("messageCreate", (message) => {
         const command = content[1];
         const argument = content[2] || null;
 
-        if (command == "points") { points(message)};
+        if (command === "points") { points(message)};
         
-        if (command == "ingame") { 
+        if (command === "ingame") { 
             if (argument == null) {
                 msgTestChannel("Please input a user (ie !ingame harry)");
             }

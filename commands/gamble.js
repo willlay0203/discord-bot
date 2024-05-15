@@ -34,7 +34,7 @@ const getID = async (name, tag) => {
 */
 const grabParticipantData = (puuid, data) => {
     for (const participant of data.participants) {
-        if (participant.puuid == puuid) {
+        if (participant.puuid === puuid) {
             return participant;
         }
 
@@ -46,7 +46,7 @@ const grabParticipantData = (puuid, data) => {
 */
 const findMatchingID = (data, user) => {
     for (const player of data.users) {
-        if (player.name == user) {
+        if (player.name === user) {
             const id = getID(player.id, player.tag);
             return id;
         }
