@@ -4,6 +4,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
+import isInLeagueGame from './commands/gamble.js'
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -61,10 +62,27 @@ function eventTimer() {
 eventTimer()
 
 bot.on("messageCreate", (message) => {
-    const commandRegex = /^![^\s]+/; 
-    const command = message.content.match(commandRegex)
-    
-    if (command == "!points") { getPoints(message) };
+    const commandRegex = /^!(\w+)\s*(\w+)?/; 
+    const content = message.content.match(commandRegex);
+
+    if (content) {
+        const command = content[1];
+        const argument = content[2] || null;
+
+        if (command === "points") { points(message)};
+        
+        if (command === "ingame") { 
+            if (argument == null) {
+                msgTestChannel("Please input a user (ie !ingame harry)");
+            }
+
+            else {
+            isInLeagueGame(argument);
+        }
+
+        }
+    }
+
 })
 
 let treasureEventCounters = {
