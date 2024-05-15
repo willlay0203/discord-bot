@@ -10,26 +10,24 @@ export const createEmbed = () => {
         .setStyle(ButtonStyle.Success);
 
     let treasureEmbed = new EmbedBuilder()
-        .setTitle(`CLICK COLLECT FOR ${points}PP`)
+        .setTitle(`CLICK COLLECT TO GET ${points}PP`)
         .setImage("https://media1.tenor.com/m/BxOD5xq4VfIAAAAC/lebron-sunshine-lebron-james-sunshine.gif")
         .setColor("#FF0000");
         
     let actionRow = new ActionRowBuilder()
         .addComponents(treasureCollectButton);
 
+    console.log(`Sent a Treasure event for ${points}PP`);
     bot.channels.cache.get("1239742831518679145").send({
         embeds: [treasureEmbed],
         components:[actionRow]
     }).then(message => setTimeout(async () => {
-        // Fix the messages coming in wrong
-        const messageId = await bot.channels.cache.get("1239742831518679145").messages.fetch(message.id);
-        if (messageId === null) {
-            console.log("cant find")
-        } else {
-            console.log("exists")
-        }
-    }, 10000
-))
+        // 404 error if the message has been deleted. Just catch it so it doesn't fail the bot
+        console.log("Removing treasure event");
+        message.delete().catch(error => {
+            console.log(`Treasure all been collected`);
+        });
+    }, 10000))  
 }
 
 export default createEmbed;

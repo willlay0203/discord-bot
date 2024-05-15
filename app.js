@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder} from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
-import addTimePoints from './utils/points.js';
+import addTimePoints, { addPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
 
 dotenv.config();
@@ -53,14 +53,38 @@ bot.on("messageCreate", (message) => {
 
 setInterval(() => {
     createEmbed();
-}, 5000)
+}, 20000)
+
+let treasureEventCounters = {
+    remaining: 2,
+    membersClicked: []
+};
 
 bot.on("interactionCreate", (interaction) => {
+    // Treasure features
     if (interaction.customId === "treasureButton") {
-        let user = interaction.member.user.displayName;
-        interaction.message.delete()
-        interaction.message.channel.send(`${user} collected `)
-        // user id = interaction.member.user.id
+        let member = interaction.member;
+        let points = interaction.message.embeds[0].title.match(/CLICK COLLECT TO GET (\d+)PP/)[1];
+
+        if (treasureEventCounters.membersClicked.includes(member.id)) {
+            interaction.reply(`${bold(member.user.displayName)} you've already done it!`);
+            return;
+        };
+
+        //Update the counter
+        treasureEventCounters.remaining -= 1;
+        treasureEventCounters.membersClicked.push(member.id)
+
+        console.log(`${member.user.displayName} has clicked, remaining treasure ${treasureEventCounters.remaining}`);
+        addPoints(parseInt((points)), member);
+        interaction.reply(`${bold(member.user.displayName)} collected ${points}PP`);
+        
+        // Reset
+        if (treasureEventCounters.remaining == 0) {
+            interaction.message.delete();
+            treasureEventCounters.remaining = 0;
+            treasureEventCounters.membersClicked = [];
+        }
     }
 })
 
