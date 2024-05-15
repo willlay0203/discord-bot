@@ -44,16 +44,27 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     }
 })
 
+// This is to run periodic events
+function eventTimer() {
+    const minTime = 1200000; // 20min  
+    const maxTime = 2400000; // 40min 
+    const intervalTime = Math.random() * (maxTime - minTime) + minTime;
+
+    console.log(`Next event in ${(intervalTime / (60 * 1000)).toFixed(2)} minutes`);
+
+    setTimeout(() => {
+        console.log("Treasure event started");
+        createEmbed(); // Start the interval again after sending the message
+      }, intervalTime);
+}
+eventTimer()
+
 bot.on("messageCreate", (message) => {
     const commandRegex = /^![^\s]+/; 
     const command = message.content.match(commandRegex)
     
     if (command == "!points") { getPoints(message) };
 })
-
-setInterval(() => {
-    createEmbed();
-}, 20000)
 
 let treasureEventCounters = {
     remaining: 2,
@@ -88,4 +99,4 @@ bot.on("interactionCreate", (interaction) => {
     }
 })
 
-bot.login(process.env.TEST_BOT_TOKEN);
+bot.login(process.env.BOT_TOKEN);

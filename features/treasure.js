@@ -18,7 +18,8 @@ export const createEmbed = () => {
         .addComponents(treasureCollectButton);
 
     console.log(`Sent a Treasure event for ${points}PP`);
-    bot.channels.cache.get("1239742831518679145").send({
+    // Hard coded to send to main text channel
+    bot.channels.cache.get("199749576851193856").send({
         embeds: [treasureEmbed],
         components:[actionRow]
     }).then(message => setTimeout(async () => {
@@ -27,7 +28,7 @@ export const createEmbed = () => {
         message.delete().catch(error => {
             console.log(`Treasure all been collected`);
         });
-    }, 10000))  
+    }, 600000))  // 10 min 
 }
 
 export default createEmbed;
