@@ -92,26 +92,26 @@ export const isInLeagueGame = async(user) => {
 
         /** Calculate minutes and seconds for display
         */
-        const gameMinutes = Math.floor(gameLength / 60)
-        const gameSeconds = gameLength - gameMinutes * 60
-        let gameTime = ''
+        const gameMinutes = Math.floor(gameLength / 60);
+        const gameSeconds = gameLength - gameMinutes * 60;
+        let gameTime = '';
         
         /** Loading screen check
         */        
         if (gameMinutes < 0) {
-            gameTime = "Loading Screen"
+            gameTime = "Loading Screen";
         }
 
         else {
-            gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`           
+            gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
         }
 
-        const msg = `$bold{Username:} ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}`
+        const msg = `{Username:} ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}`;
         msgChannel(msg);
 
     } catch(error) {
         console.error("Error:", error);
-        console.log("If 403 unauth check LOL api key")
+        console.log("If 403 unauth check LOL api key");
         msgChannel('oops bug');
     }
 }
