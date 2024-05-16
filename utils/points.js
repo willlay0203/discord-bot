@@ -10,6 +10,10 @@ export const addPoints = (points, member) => {
     postPoints(points, member);
 }
 
+const removePoints = (points, member) => {
+    postPoints(-points, member);
+}
+
 async function postPoints(points, member) {
     try {
         // Check if the user exists in the database
@@ -28,4 +32,30 @@ async function postPoints(points, member) {
         console.log(error)
     };
 }
-export default addTimePoints;
+
+
+// for testing
+export const removeTenPoints = (member) => {
+    const points = 10;
+    postPointsTest(-points, member);
+}
+
+
+// test function to adjust points for a SPECIFIC MEMBER (identified by member ID)
+// only for testing
+async function postPointsTest(points, memberID) {
+    try {
+        // Check if the user exists in the database
+        const user = await db.db("points-db").collection("Users").findOne({_id: memberID});
+        
+
+        db.db("points-db").collection("Users").updateOne(
+            { _id: memberID },
+            { $inc: {points: points }})
+
+        console.log(`Removed ${points} from minihawwy`);
+    } catch (error) {
+        console.log(error)
+    };
+}
+export default { addTimePoints, removeTenPoints };

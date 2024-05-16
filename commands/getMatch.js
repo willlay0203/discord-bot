@@ -1,8 +1,10 @@
 import {db} from "../app.js";
-import { bold } from 'discord.js';
 import { msgChannel } from "../utils/msg.js";
 import dotenv from 'dotenv';
 import players from '../data/players.json' assert { type: 'json' };
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold} from 'discord.js';
+
+
 dotenv.config();
 
 const LOL_API_KEY = process.env.LOL_API_TOKEN
@@ -56,16 +58,18 @@ const findMatchingID = (data, user) => {
 /** Check if a given user is currently in a League match
  *  if they are print username, gamemode, and duration
 */
-export const isInLeagueGame = async(user) => {
-    const id = await findMatchingID(players, user);
+export const isInLeagueGame = async(message, user) => {
+    // const id = await findMatchingID(players, user);
+    // console.log(id);
+    // if (!id) {
+    //     msgChannel("Invalid username");
+    //     return 0;
+    // }
 
-    if (!id) {
-        msgChannel("Invalid username");
-        return 0;
-    }
-    
+    // use this while testing 
+    const id = await getID('Frank Zane', 'Doner');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
-
+    console.log(id);
     try {
         const response = await fetch(requestUrl);
 
@@ -82,22 +86,20 @@ export const isInLeagueGame = async(user) => {
 
         const data = await response.json();
 
-        /** Match data as variables
-        */
+        // Match data as variables
+        
         const gameType = data.gameType;
         const gameMode = data.gameMode;
         const gameLength = data.gameLength;
+        const gameId = data.gameId;
         const userData = grabParticipantData(id, data);
         const userName = userData.riotId;
-
-        /** Calculate minutes and seconds for display
-        */
+        // Calculate minutes and seconds for display
         const gameMinutes = Math.floor(gameLength / 60);
         const gameSeconds = gameLength - gameMinutes * 60;
         let gameTime = '';
         
-        /** Loading screen check
-        */        
+        // Loading screen check     
         if (gameMinutes < 0) {
             gameTime = "Loading Screen";
         }
@@ -106,8 +108,27 @@ export const isInLeagueGame = async(user) => {
             gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
         }
 
-        const msg = `{Username:} ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}`;
-        msgChannel(msg);
+        const msg = `Username: ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}\n Would like you like to bet?`;
+
+        const betWin = new ButtonBuilder()
+            .setCustomId('win')
+            .setLabel('Bet on a Win')
+            .setStyle(ButtonStyle.Success);
+
+        const betLoss = new ButtonBuilder()
+            .setCustomId('loss')
+            .setLabel('Bet on a Loss')
+            .setStyle(ButtonStyle.Danger);
+
+        const row = new ActionRowBuilder()
+            .addComponents(betWin, betLoss);
+
+        await message.channel.send({
+            content: msg,
+            components: [row]
+        });
+
+        return gameId;
 
     } catch(error) {
         console.error("Error:", error);
