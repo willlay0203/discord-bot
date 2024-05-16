@@ -45,6 +45,11 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
     }
 })
 
+let treasureEventCounters = {
+    remaining: 2,
+    membersClicked: []
+};
+
 // This is to run periodic events
 function eventTimer() {
     const minTime = 1200000; // 20min  
@@ -55,6 +60,11 @@ function eventTimer() {
 
     setTimeout(() => {
         console.log("Treasure event started");
+        // Reset
+        treasureEventCounters = {
+            remaining: 2,
+            membersClicked: []
+        };
         createEmbed(); // Start the interval again after sending the message
         eventTimer();
       }, intervalTime);
@@ -69,7 +79,7 @@ bot.on("messageCreate", (message) => {
         const command = content[1];
         const argument = content[2] || null;
 
-        if (command === "points") { points(message)};
+        if (command === "points") { getPoints(message)};
         
         if (command === "ingame") { 
             if (argument == null) {
@@ -84,11 +94,6 @@ bot.on("messageCreate", (message) => {
     }
 
 })
-
-let treasureEventCounters = {
-    remaining: 2,
-    membersClicked: []
-};
 
 bot.on("interactionCreate", (interaction) => {
     // Treasure features
