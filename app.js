@@ -5,6 +5,7 @@ import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
 import isInLeagueGame from './commands/gamble.js'
+import { msgChannel } from './utils/msg.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -83,7 +84,7 @@ bot.on("messageCreate", (message) => {
         
         if (command === "ingame") { 
             if (argument == null) {
-                msgTestChannel("Please input a user (ie !ingame harry)");
+                msgChannel("Please input a user (ie !ingame harry)");
             }
 
             else {
