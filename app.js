@@ -110,13 +110,15 @@ bot.on("interactionCreate", (interaction) => {
         console.log(`${member.user.displayName} has clicked, remaining treasure ${treasureEventCounters.remaining}`);
         addPoints(parseInt((points)), member);
         interaction.reply(`${bold(member.user.displayName)} collected ${points}PP`);
-        setTimeout( async () => await interaction.deleteReply(), 20000) // deletes message after 20 seconds
+        
         // Reset
         if (treasureEventCounters.remaining <= 0) {
             interaction.message.delete();
             treasureEventCounters.remaining = 2;
             treasureEventCounters.membersClicked = [];
         }
+
+        setTimeout( async () => await interaction.deleteReply(), 600000) // deletes message after 20 seconds
     }
 })
 
