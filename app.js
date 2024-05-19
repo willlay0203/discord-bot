@@ -85,15 +85,11 @@ bot.on("messageCreate", (message) => {
         if (command === "ingame") { 
             if (argument == null) {
                 msgChannel("Please input a user (ie !ingame harry)");
+            } else {
+                isInLeagueGame(argument);
             }
-
-            else {
-            isInLeagueGame(argument);
-        }
-
         }
     }
-
 })
 
 bot.on("interactionCreate", (interaction) => {
@@ -114,7 +110,7 @@ bot.on("interactionCreate", (interaction) => {
         console.log(`${member.user.displayName} has clicked, remaining treasure ${treasureEventCounters.remaining}`);
         addPoints(parseInt((points)), member);
         interaction.reply(`${bold(member.user.displayName)} collected ${points}PP`);
-        
+        setTimeout( async () => await interaction.deleteReply(), 20000) // deletes message after 20 seconds
         // Reset
         if (treasureEventCounters.remaining <= 0) {
             interaction.message.delete();
