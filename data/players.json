@@ -45,6 +45,16 @@
             "name": "petar",
             "id": "winnerpi",
             "tag": "oce"
+        },
+        {
+            "name": "george",
+            "id": "gazzor",
+            "tag": "oce"
+        },
+        {
+            "name": "alex",
+            "id": "al_ius",
+            "tag": "oce"
         }
     ]
 }
