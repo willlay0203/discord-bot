@@ -97,15 +97,15 @@ export const didWin = async (match, user) => {
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-        // const id = await findMatchingID(players, user);
-        // console.log(id);
-        // if (!id) {
-        //     msgChannel("Invalid username");
-        //     return 0;
-        // }
+        const id = await findMatchingID(players, user);
+
+        if (!id) {
+            msgChannel("Invalid username");
+            return 0;
+        }
 
     // use this while testing 
-    const id = await getID('JokerLove', '我是小丑');
+    // const id = await getID('', '');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     console.log(id);
     try {
@@ -146,27 +146,35 @@ export const isInLeagueGame = async(message, user) => {
             gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
         }
 
-        const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n **Would like you like to bet?**`;
+        const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        const betWin = new ButtonBuilder()
-            .setCustomId('win')
-            .setLabel('Win')
-            .setStyle(ButtonStyle.Success);
+        if (gameLength <= 300) {
+            const betWin = new ButtonBuilder()
+                .setCustomId('win')
+                .setLabel('Bet Win')
+                .setStyle(ButtonStyle.Success);
 
-        const betLoss = new ButtonBuilder()
-            .setCustomId('loss')
-            .setLabel('Loss')
-            .setStyle(ButtonStyle.Danger);
+            const betLoss = new ButtonBuilder()
+                .setCustomId('loss')
+                .setLabel('Bet Loss')
+                .setStyle(ButtonStyle.Danger);
 
-        const row = new ActionRowBuilder()
-            .addComponents(betWin, betLoss);
+            const row = new ActionRowBuilder()
+                .addComponents(betWin, betLoss);
 
+                await message.channel.send({
+                    content: msg,
+                    components: [row]
+                });
+        }
+
+        else {
         await message.channel.send({
             content: msg,
-            components: [row]
         });
+    }
 
-        return { gameId , id, gameLength};
+        return { gameId , id};
 
     } catch(error) {
         console.error("Error:", error);

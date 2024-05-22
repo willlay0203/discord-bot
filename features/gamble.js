@@ -17,7 +17,6 @@ const checkBet = async (match, predictedResult, userId, member) => {
             console.log(`Predicted result was ${predictedResult}`);
 
             if (betOutcome === predictedResult) {
-                addPoints(1000, member);
                 return true;
             } else {
                 return false;
@@ -32,21 +31,24 @@ const checkBet = async (match, predictedResult, userId, member) => {
 
 // handle the bet interaction
 // if point count is enough place the bet
-export const handleBet = async (interaction, match, userId) => {
+export const handleBet = async (interaction, match, userId, betAmount) => {
     let member = interaction.member;
-    const hasEnoughPoints = await pointsEnough(interaction.member.id, 1000);
+    const hasEnoughPoints = await pointsEnough(interaction.member.id, betAmount);
 
     if (!hasEnoughPoints) {
         console.log(`${interaction.member.id}'s points weren't enough to the bet`);
-        await interaction.reply(`You don't have enough points to bet!`);
+        await interaction.followUp(`You don't have enough points to bet!`);
         return false;
     }
     
     if (interaction.customId === 'win' || interaction.customId === 'loss') {
         const predictedResult = interaction.customId;
-        await interaction.reply(`You placed a bet for: ${predictedResult}`);
-        removePoints(1000, member);
+        await interaction.followUp(`**You placed a bet of ${betAmount} for a ${predictedResult}**`);
+        removePoints(betAmount, member);
         const betResult = await checkBet(match, predictedResult, userId, member);
+        if (betResult) {
+            addPoints(betAmount * 2, member);
+        }
         return betResult;
     }
 };

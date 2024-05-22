@@ -89,7 +89,7 @@ bot.on("messageCreate", async (message) => {
                 const leagueDetails = await isInLeagueGame(message, argument);
                 liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
                 liveGameDetails.userId = leagueDetails.id;
-                liveGameDetails.gameLength = leagueDetails.gameLength;
+                console.log(`${liveGameDetails.gameId} and ${liveGameDetails.userId}`);
             } catch (error) {
                 console.error("Error fetching game ID", error);
             }
@@ -139,21 +139,34 @@ bot.on("interactionCreate", async (interaction) => {
             return;
         };
 
-        if (leagueDetails.gameLength >= 300) {
-            interaction.reply(`Betting period is over!`);
-            return;            
+        liveGameDetails.membersBet.push(member.id);
+        console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
+
+        await interaction.reply(`You chose to bet on: ${interaction.customId}. Please enter the amount you want to bet:`);
+
+        const filter = response => response.author.id === interaction.user.id;
+        const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 30000, errors: ['time'] })
+            .catch(() => {
+                interaction.followUp('Timeout');
+                return null;
+            });
+
+        let betAmount = 0;
+        if (collected) {
+            betAmount = parseInt(collected.first().content);
+            if (isNaN(betAmount) || betAmount <= 0) {
+                interaction.followUp('Please enter a valid amount.');
+                return;
+            }
         }
 
-        liveGameDetails.membersBet.push(member.id)
-
-        console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
-        const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId);
+        const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
 
         if (betResult) {
-           await interaction.followUp(`${bold(member.user.displayName)}'s bet won!`);
+           await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2}`);
            console.log(`${member.user.displayName} Bet won`);
         } else {
-           await interaction.followUp(`${bold(member.user.displayName)}'s bet lost.`);
+           await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount}`);
            console.log(`${member.user.displayName} Bet lost`);
         }
         
