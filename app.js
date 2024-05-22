@@ -132,7 +132,17 @@ bot.on("interactionCreate", async (interaction) => {
         console.log(gameId);
         console.log(userId);
         console.log(`${member.displayName}  has bet on match ${gameId}`);
-        await handleBet(interaction, gameId, userId);
+        const betResult = await handleBet(interaction, gameId, userId);
+
+        if (betResult) {
+            interaction.reply(`${bold(member.user.displayName)}'s bet was a sucess`);
+            return;
+        }
+
+        if (!betResult) {
+            interaction.reply(`${bold(member.user.displayName)}'s bet failed`);
+            return;
+        }
     }
 })
 

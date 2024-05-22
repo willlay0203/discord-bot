@@ -1,4 +1,5 @@
 import { db } from "../app.js";
+import points from "../commands/getPoints.js";
 
 export const addTimePoints = (currTime, member, users) => {
     // 10 points per minute
@@ -10,7 +11,7 @@ export const addPoints = (points, member) => {
     postPoints(points, member);
 }
 
-const removePoints = (points, member) => {
+export const removePoints = (points, member) => {
     postPoints(-points, member);
 }
 
@@ -40,6 +41,23 @@ export const removeTenPoints = (member) => {
     postPointsTest(-points, member);
 }
 
+// check if points on hand are higher than points bet (ie cost of bet)
+export const pointsEnough = async (memberId, cost) => {
+
+    try {
+        const user = await db.db("points-db").collection("Users").findOne({_id: memberId});
+        console.log(`Point calculation: Ponts: ${user.points} and  Cost: ${cost}`)
+        if (user && user.points >= cost) {
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
 
 // test function to adjust points for a SPECIFIC MEMBER (identified by member ID)
 // only for testing
@@ -48,7 +66,6 @@ async function postPointsTest(points, memberID) {
         // Check if the user exists in the database
         const user = await db.db("points-db").collection("Users").findOne({_id: memberID});
         
-
         db.db("points-db").collection("Users").updateOne(
             { _id: memberID },
             { $inc: {points: points }})
@@ -58,4 +75,4 @@ async function postPointsTest(points, memberID) {
         console.log(error)
     };
 }
-export default { addTimePoints, removeTenPoints };
+export default { addTimePoints, removePoints, removeTenPoints, pointsEnough };
