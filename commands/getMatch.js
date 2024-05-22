@@ -10,7 +10,7 @@ dotenv.config();
 const LOL_API_KEY = process.env.LOL_API_TOKEN
 const REGION_URL = 'https://asia.api.riotgames.com'
 const MATCH_REGION_URL = 'https://oc1.api.riotgames.com'
-
+const MATCHID_URL = 'https://sea.api.riotgames.com'
 /** Grab PUUID for given summoner name + tag (ie steven#OCE)
 */
 const getID = async (name, tag) => {
@@ -55,19 +55,50 @@ const findMatchingID = (data, user) => {
     }
 }
 
+export const didWin = async (match, user) => {
+    const id = await findMatchingID(players, user);
+    if (!id) {
+        return false;
+    }
+
+    const requestUrl = `${MATCHID_URL}/lol/match/v5/matches/${match}?api_key=${LOL_API_KEY}`;
+    try {
+        const response = await fetch(requestUrl);
+        if (!response.ok) {
+            throw new Error(`Error! status: ${response.status}`);
+        }
+
+        const matchData = await response.json();
+        const participant = grabParticipantData(id, matchData);
+
+        if (!participant) {
+            return false;
+        }
+
+        if (participant.win === true) {
+            return 'win';
+        }
+
+        return 'loss';
+    } catch (error) {
+        console.error("Error:", error);
+        return false;
+    }
+};
+
 /** Check if a given user is currently in a League match
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-    // const id = await findMatchingID(players, user);
-    // console.log(id);
-    // if (!id) {
-    //     msgChannel("Invalid username");
-    //     return 0;
-    // }
+        const id = await findMatchingID(players, user);
+        console.log(id);
+        if (!id) {
+            msgChannel("Invalid username");
+            return 0;
+        }
 
     // use this while testing 
-    const id = await getID('Frank Zane', 'Doner');
+    // const id = await getID('Cexxxxx', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     console.log(id);
     try {
@@ -128,7 +159,7 @@ export const isInLeagueGame = async(message, user) => {
             components: [row]
         });
 
-        return gameId;
+        return { gameId , id};
 
     } catch(error) {
         console.error("Error:", error);
@@ -137,4 +168,20 @@ export const isInLeagueGame = async(message, user) => {
     }
 }
 
-export default isInLeagueGame;
+// Check if a given game has ended
+export const hasGameEnded = async (match) => {
+    try {
+        console.log(`Checking if game has ended for ${match}`);
+        const requestUrl = `${MATCHID_URL}/lol/match/v5/matches/${match}/?api_key=${LOL_API_KEY}`;
+        const response = await fetch(requestUrl);
+        const data = await response.json();
+        // Assume the game is over if the match data contains the game end timestamp
+        return data.info.gameEndTimestamp != null;
+    } catch (error) {
+        console.error('Error fetching game status:', error);
+        return false; 
+        // Assume the game is not over if there's an error
+    }
+}
+
+export default {isInLeagueGame, hasGameEnded};

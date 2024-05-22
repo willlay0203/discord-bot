@@ -4,7 +4,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
-import isInLeagueGame from './commands/getMatch.js'
+import { isInLeagueGame } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
 import { msgChannel } from './utils/msg.js';
 
@@ -64,6 +64,7 @@ function eventTimer() {
 eventTimer()
 
 let gameId = '';
+let userId = ''; 
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -82,7 +83,9 @@ bot.on("messageCreate", async (message) => {
             }
 
             try {
-                gameId = await isInLeagueGame(message, argument);
+                const leagueDetails = await isInLeagueGame(message, argument);
+                gameId = `OC1_${leagueDetails.gameId}`;
+                userId = leagueDetails.id;
             } catch (error) {
                 console.error("Error fetching game ID", error);
             }
@@ -127,9 +130,9 @@ bot.on("interactionCreate", async (interaction) => {
         let member = interaction.member;
         // removeTenPoints('186803619209805825');
         console.log(gameId);
-        handleBet(interaction, gameId);
-        console.log(`${member.displayName}  has bet on match`);
-
+        console.log(userId);
+        console.log(`${member.displayName}  has bet on match ${gameId}`);
+        await handleBet(interaction, gameId, userId);
     }
 })
 
