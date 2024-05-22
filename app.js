@@ -75,8 +75,6 @@ bot.on("messageCreate", async (message) => {
         const argument = content[2] || null;
 
         if (command === "points") { getPoints(message)};
-
-        if (command === "test") { didWin("OC1_624786678", "W3XPSvMu8iGilEb1Jt9-PKPJjHQ_h9OMkIMq8emLCOTrwvpND-trePeBe1kRz1LDYRi-4f74DUPTdw")};
         
         if (command === "ingame") { 
             if (argument == null) {
