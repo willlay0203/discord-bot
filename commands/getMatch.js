@@ -146,7 +146,7 @@ export const isInLeagueGame = async(message, user) => {
             gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
         }
 
-        const msg = `Username: ${userName} \nGame Mode: ${gameMode} \nGame Duration: ${gameTime}\n Would like you like to bet?`;
+        const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n **Would like you like to bet?**`;
 
         const betWin = new ButtonBuilder()
             .setCustomId('win')
@@ -185,7 +185,8 @@ export const hasGameEnded = async (match) => {
         // Assume the game is over if the match data contains the game end timestamp
         return data.info.gameEndTimestamp != null;
     } catch (error) {
-        console.error('Error fetching game status:', error);
+        // Just need to catch to prevent a crash
+        // console.error('Error fetching game status:', error);
         return false; 
         // Assume the game is not over if there's an error
     }

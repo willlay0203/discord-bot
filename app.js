@@ -63,8 +63,11 @@ function eventTimer() {
 }
 eventTimer()
 
-let gameId = '';
-let userId = ''; 
+let liveGameDetails = {
+    gameId: '',
+    userId: '',
+    membersBet: []
+};
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -84,8 +87,8 @@ bot.on("messageCreate", async (message) => {
 
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
-                gameId = `OC1_${leagueDetails.gameId}`;
-                userId = leagueDetails.id;
+                liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
+                liveGameDetails.userId = leagueDetails.id;
             } catch (error) {
                 console.error("Error fetching game ID", error);
             }
@@ -129,19 +132,28 @@ bot.on("interactionCreate", async (interaction) => {
     // gamble features
     if (interaction.customId === "win" || interaction.customId === "loss") {
         let member = interaction.member;
-        console.log(`${member.displayName}  has bet on match ${gameId}`);
-        const betResult = await handleBet(interaction, gameId, userId);
+
+        if (liveGameDetails.membersBet.includes(member.id)) {
+            interaction.reply(`${bold(member.user.displayName)} you've already bet on this match`);
+            return;
+        };
+
+        liveGameDetails.membersBet.push(member.id)
+
+        console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
+        const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId);
 
         if (betResult) {
-           await interaction.followUp(`${bold(member.user.displayName)}'s bet was a success`);
-           console.log(`${member.user.displayName} Bet success`);
+           await interaction.followUp(`${bold(member.user.displayName)}'s bet won!`);
+           console.log(`${member.user.displayName} Bet won`);
         } else {
-           await interaction.followUp(`${bold(member.user.displayName)}'s bet failed`);
-           console.log(`${member.user.displayName} Bet fail`);
+           await interaction.followUp(`${bold(member.user.displayName)}'s bet lost.`);
+           console.log(`${member.user.displayName} Bet lost`);
         }
         
-        userId = '';
-        gameId = '';
+        liveGameDetails.userId = '';
+        liveGameDetails.gameId = '';
+        liveGameDetails.membersBet = [];
         
     }
 })
