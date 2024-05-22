@@ -32,7 +32,7 @@ const getID = async (name, tag) => {
 }
 
 
-/** Grab specific user data within a given match
+/** Grab specific user data within an ongoing match
 */
 const grabParticipantData = (puuid, data) => {
     for (const participant of data.participants) {
@@ -40,6 +40,18 @@ const grabParticipantData = (puuid, data) => {
             return participant;
         }
 
+    }
+}
+
+/** Grab specific user data within a given COMPLETED match
+*/
+const grabParticipantDataCompleted = (puuid, data) => {
+    for (const participant of data.info.participants) {
+        if (participant.puuid === puuid) {
+            console.log("Participant found");
+            return participant;
+        }
+        console.log("Participant not found");
     }
 }
 
@@ -56,12 +68,8 @@ const findMatchingID = (data, user) => {
 }
 
 export const didWin = async (match, user) => {
-    const id = await findMatchingID(players, user);
-    if (!id) {
-        return false;
-    }
-
     const requestUrl = `${MATCHID_URL}/lol/match/v5/matches/${match}?api_key=${LOL_API_KEY}`;
+    
     try {
         const response = await fetch(requestUrl);
         if (!response.ok) {
@@ -69,9 +77,11 @@ export const didWin = async (match, user) => {
         }
 
         const matchData = await response.json();
-        const participant = grabParticipantData(id, matchData);
+        console.log(matchData);
+        const participant = grabParticipantDataCompleted(user, matchData);
 
         if (!participant) {
+            console.log("participant not found");
             return false;
         }
 
@@ -98,7 +108,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
     // use this while testing 
-    // const id = await getID('Cexxxxx', 'OCE');
+    // const id = await getID('', '');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     console.log(id);
     try {

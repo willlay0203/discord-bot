@@ -4,7 +4,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
-import { isInLeagueGame } from './commands/getMatch.js'
+import { isInLeagueGame, didWin } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
 import { msgChannel } from './utils/msg.js';
 
@@ -75,6 +75,8 @@ bot.on("messageCreate", async (message) => {
         const argument = content[2] || null;
 
         if (command === "points") { getPoints(message)};
+
+        if (command === "test") { didWin("OC1_624786678", "W3XPSvMu8iGilEb1Jt9-PKPJjHQ_h9OMkIMq8emLCOTrwvpND-trePeBe1kRz1LDYRi-4f74DUPTdw")};
         
         if (command === "ingame") { 
             if (argument == null) {
@@ -126,6 +128,7 @@ bot.on("interactionCreate", async (interaction) => {
         }
     }
 
+    // gamble features
     if (interaction.customId === "win" || interaction.customId === "loss") {
         let member = interaction.member;
         // removeTenPoints('186803619209805825');
@@ -135,14 +138,16 @@ bot.on("interactionCreate", async (interaction) => {
         const betResult = await handleBet(interaction, gameId, userId);
 
         if (betResult) {
-            interaction.reply(`${bold(member.user.displayName)}'s bet was a sucess`);
-            return;
+           // await interaction.followUp(`${bold(member.user.displayName)}'s bet was a success`);
+           console.log(`${member.user.displayName} Bet success`);
+        } else {
+           // await interaction.followUp(`${bold(member.user.displayName)}'s bet failed`);
+           console.log(`${member.user.displayName} Bet fail`);
         }
-
-        if (!betResult) {
-            interaction.reply(`${bold(member.user.displayName)}'s bet failed`);
-            return;
-        }
+        
+        userId = '';
+        gameId = '';
+        
     }
 })
 
