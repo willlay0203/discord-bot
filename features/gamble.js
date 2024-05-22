@@ -45,7 +45,7 @@ export const handleBet = async (interaction, match, userId) => {
     if (interaction.customId === 'win' || interaction.customId === 'loss') {
         const predictedResult = interaction.customId;
         await interaction.reply(`You placed a bet for: ${predictedResult}`);
-        removePoints(10, member);
+        removePoints(1000, member);
         const betResult = await checkBet(match, predictedResult, userId, member);
         return betResult;
     }

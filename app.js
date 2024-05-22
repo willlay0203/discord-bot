@@ -89,6 +89,7 @@ bot.on("messageCreate", async (message) => {
                 const leagueDetails = await isInLeagueGame(message, argument);
                 liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
                 liveGameDetails.userId = leagueDetails.id;
+                liveGameDetails.gameLength = leagueDetails.gameLength;
             } catch (error) {
                 console.error("Error fetching game ID", error);
             }
@@ -137,6 +138,11 @@ bot.on("interactionCreate", async (interaction) => {
             interaction.reply(`${bold(member.user.displayName)} you've already bet on this match`);
             return;
         };
+
+        if (leagueDetails.gameLength >= 600) {
+            interaction.reply(`Betting period is over!`);
+            return;            
+        }
 
         liveGameDetails.membersBet.push(member.id)
 

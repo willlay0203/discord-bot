@@ -166,7 +166,7 @@ export const isInLeagueGame = async(message, user) => {
             components: [row]
         });
 
-        return { gameId , id};
+        return { gameId , id, gameLength};
 
     } catch(error) {
         console.error("Error:", error);
@@ -174,6 +174,7 @@ export const isInLeagueGame = async(message, user) => {
         msgChannel('oops bug');
     }
 }
+
 
 // Check if a given game has ended
 export const hasGameEnded = async (match) => {
