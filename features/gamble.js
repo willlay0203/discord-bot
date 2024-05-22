@@ -14,14 +14,12 @@ const checkBet = async (match, predictedResult, userId, member) => {
             console.log(`Game ${match} has ended.`);
             const betOutcome = await didWin(match, userId);
             console.log(`Bet outcome is ${betOutcome}`);
-            console.log(`Predicted result is ${predictedResult}`);
+            console.log(`Predicted result was ${predictedResult}`);
 
             if (betOutcome === predictedResult) {
-                console.log('Bet win');
                 addPoints(10, member);
                 return true;
             } else {
-                console.log('Bet lost');
                 return false;
             }
         }

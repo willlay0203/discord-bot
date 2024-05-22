@@ -129,17 +129,14 @@ bot.on("interactionCreate", async (interaction) => {
     // gamble features
     if (interaction.customId === "win" || interaction.customId === "loss") {
         let member = interaction.member;
-        // removeTenPoints('186803619209805825');
-        console.log(gameId);
-        console.log(userId);
         console.log(`${member.displayName}  has bet on match ${gameId}`);
         const betResult = await handleBet(interaction, gameId, userId);
 
         if (betResult) {
-           // await interaction.followUp(`${bold(member.user.displayName)}'s bet was a success`);
+           await interaction.followUp(`${bold(member.user.displayName)}'s bet was a success`);
            console.log(`${member.user.displayName} Bet success`);
         } else {
-           // await interaction.followUp(`${bold(member.user.displayName)}'s bet failed`);
+           await interaction.followUp(`${bold(member.user.displayName)}'s bet failed`);
            console.log(`${member.user.displayName} Bet fail`);
         }
         

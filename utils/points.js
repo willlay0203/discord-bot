@@ -46,7 +46,6 @@ export const pointsEnough = async (memberId, cost) => {
 
     try {
         const user = await db.db("points-db").collection("Users").findOne({_id: memberId});
-        console.log(`Point calculation: Ponts: ${user.points} and  Cost: ${cost}`)
         if (user && user.points >= cost) {
             return true;
         }

@@ -34,7 +34,7 @@ const getID = async (name, tag) => {
 
 /** Grab specific user data within an ongoing match
 */
-const grabParticipantData = (puuid, data) => {
+const grabParticipantDataOngoing = (puuid, data) => {
     for (const participant of data.participants) {
         if (participant.puuid === puuid) {
             return participant;
@@ -48,10 +48,8 @@ const grabParticipantData = (puuid, data) => {
 const grabParticipantDataCompleted = (puuid, data) => {
     for (const participant of data.info.participants) {
         if (participant.puuid === puuid) {
-            console.log("Participant found");
             return participant;
         }
-        console.log("Participant not found");
     }
 }
 
@@ -77,11 +75,10 @@ export const didWin = async (match, user) => {
         }
 
         const matchData = await response.json();
-        console.log(matchData);
         const participant = grabParticipantDataCompleted(user, matchData);
 
         if (!participant) {
-            console.log("participant not found");
+            console.log("didWin - Participant not found");
             return false;
         }
 
@@ -100,15 +97,15 @@ export const didWin = async (match, user) => {
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-        const id = await findMatchingID(players, user);
-        console.log(id);
-        if (!id) {
-            msgChannel("Invalid username");
-            return 0;
-        }
+        // const id = await findMatchingID(players, user);
+        // console.log(id);
+        // if (!id) {
+        //     msgChannel("Invalid username");
+        //     return 0;
+        // }
 
     // use this while testing 
-    // const id = await getID('', '');
+    const id = await getID('JokerLove', '我是小丑');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     console.log(id);
     try {
@@ -133,7 +130,7 @@ export const isInLeagueGame = async(message, user) => {
         const gameMode = data.gameMode;
         const gameLength = data.gameLength;
         const gameId = data.gameId;
-        const userData = grabParticipantData(id, data);
+        const userData = grabParticipantDataOngoing(id, data);
         const userName = userData.riotId;
         // Calculate minutes and seconds for display
         const gameMinutes = Math.floor(gameLength / 60);
@@ -153,12 +150,12 @@ export const isInLeagueGame = async(message, user) => {
 
         const betWin = new ButtonBuilder()
             .setCustomId('win')
-            .setLabel('Bet on a Win')
+            .setLabel('Win')
             .setStyle(ButtonStyle.Success);
 
         const betLoss = new ButtonBuilder()
             .setCustomId('loss')
-            .setLabel('Bet on a Loss')
+            .setLabel('Loss')
             .setStyle(ButtonStyle.Danger);
 
         const row = new ActionRowBuilder()
