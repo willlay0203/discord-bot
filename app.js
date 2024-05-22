@@ -139,7 +139,7 @@ bot.on("interactionCreate", async (interaction) => {
             return;
         };
 
-        if (leagueDetails.gameLength >= 600) {
+        if (leagueDetails.gameLength >= 300) {
             interaction.reply(`Betting period is over!`);
             return;            
         }
