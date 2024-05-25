@@ -153,7 +153,7 @@ bot.on("interactionCreate", async (interaction) => {
         }
 
         // check that the game hasnt exceeded 5 minutes
-        if (!fiveMinuteCheck()) {
+        if (!fiveMinuteCheck(liveGameDetails.gameId)) {
             interaction.reply(`Match has already exceeded 5 minutes`);
             return;
         }
