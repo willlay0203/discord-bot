@@ -147,7 +147,7 @@ export const isInLeagueGame = async(message, user) => {
 
         const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (gameLength <= 300) {
+        if (gameLength <= 360) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -209,7 +209,7 @@ export const fiveMinuteCheck = async (id, match) => {
         const response = await fetch(requestUrl);
         const data = await response.json();
         
-        if (data.gameLength < 300) {
+        if (data.gameLength < 360) {
             return true;
         }
 
