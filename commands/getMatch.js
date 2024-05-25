@@ -147,7 +147,7 @@ export const isInLeagueGame = async(message, user) => {
 
         const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (gameLength <= 20000) {
+        if (gameLength <= 300) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -184,13 +184,13 @@ export const isInLeagueGame = async(message, user) => {
 
 
 // Check if a given game has ended
+// Assume the game is over if the match data contains the game end timestamp
 export const hasGameEnded = async (match) => {
     try {
         console.log(`Checking if game has ended for ${match}`);
         const requestUrl = `${MATCHID_URL}/lol/match/v5/matches/${match}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
-        // Assume the game is over if the match data contains the game end timestamp
         return data.info.gameEndTimestamp != null;
     } catch (error) {
         // Just need to catch to prevent a crash
@@ -201,7 +201,7 @@ export const hasGameEnded = async (match) => {
 }
 
 // Five minute check for gambling
-// true if match is less than 5 minutes in
+// True if match is less than 5 minutes in
 export const fiveMinuteCheck = async (id, match) => {
     try {
         console.log(`Checking if game has ended for ${match}`);

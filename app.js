@@ -205,6 +205,7 @@ bot.on("interactionCreate", async (interaction) => {
         });
     });
 
+    // pass to gamble.js to handle the bet
     const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
 
     if (betResult) {
