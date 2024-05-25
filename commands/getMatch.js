@@ -107,7 +107,6 @@ export const isInLeagueGame = async(message, user) => {
     // use this while testing 
     // const id = await getID('', '');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
-    console.log(id);
     try {
         const response = await fetch(requestUrl);
 
@@ -148,7 +147,7 @@ export const isInLeagueGame = async(message, user) => {
 
         const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (gameLength <= 300) {
+        if (gameLength <= 20000) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -201,4 +200,26 @@ export const hasGameEnded = async (match) => {
     }
 }
 
-export default {isInLeagueGame, hasGameEnded};
+// Five minute check for gambling
+// true if match is less than 5 minutes in
+export const fiveMinuteCheck = async (id, match) => {
+    try {
+        console.log(`Checking if game has ended for ${match}`);
+        const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
+        const response = await fetch(requestUrl);
+        const data = await response.json();
+        
+        if (data.gameLength < 300) {
+            return true;
+        }
+
+        return false;
+    } catch (error) {
+        // Just need to catch to prevent a crash
+        // console.error('Error fetching game status:', error);
+        return false; 
+        // Assume the game is not over if there's an error
+    }
+}
+
+export default {isInLeagueGame, hasGameEnded, fiveMinuteCheck};

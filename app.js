@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold} from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
-import { isInLeagueGame, didWin } from './commands/getMatch.js'
+import { isInLeagueGame, didWin, fiveMinuteCheck } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
 import { msgChannel } from './utils/msg.js';
 
@@ -79,16 +79,28 @@ bot.on("messageCreate", async (message) => {
 
         if (command === "points") { getPoints(message)};
         
+        // needs ingame + a user (eg harry)
+        // can only have one bet in progress at a time
+        // if a gameid has been defined don't allow another
         if (command === "ingame") { 
             if (argument == null) {
                 msgChannel("Please input a user (ie !ingame harry)");
                 return;
             }
 
+            if (liveGameDetails.gameId != '') {
+                msgChannel("There is already a bet in progress!");
+                return;
+            }
+
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
-                liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
-                liveGameDetails.userId = leagueDetails.id;
+
+                if (leagueDetails != 0) {
+                    liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
+                    liveGameDetails.userId = leagueDetails.id;
+                }
+
                 console.log(`${liveGameDetails.gameId} and ${liveGameDetails.userId}`);
             } catch (error) {
                 console.error("Error fetching game ID", error);
@@ -134,39 +146,72 @@ bot.on("interactionCreate", async (interaction) => {
     if (interaction.customId === "win" || interaction.customId === "loss") {
         let member = interaction.member;
 
+        // check that match id exists
+        if (liveGameDetails.gameId === '') {
+            interaction.reply(`Match has already ended`);
+            return;
+        }
+
+        // check that the game hasnt exceeded 5 minutes
+        if (!fiveMinuteCheck()) {
+            interaction.reply(`Match has already exceeded 5 minutes`);
+            return;
+        }
+
+        // one bet per match id
         if (liveGameDetails.membersBet.includes(member.id)) {
             interaction.reply(`${bold(member.user.displayName)} you've already bet on this match`);
             return;
         };
 
-        liveGameDetails.membersBet.push(member.id);
-        console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
+    liveGameDetails.membersBet.push(member.id);
+    console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
 
-        await interaction.reply(`You chose to bet on: ${interaction.customId}. Please enter the amount you want to bet:`);
-
-        const filter = response => response.author.id === interaction.user.id;
-        const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 30000, errors: ['time'] })
-            .catch(() => {
-                interaction.followUp('Timeout');
-                return null;
-            });
-
-        let betAmount = 0;
-        if (collected) {
-            betAmount = parseInt(collected.first().content);
-            if (isNaN(betAmount) || betAmount <= 0) {
-                interaction.followUp('Please enter a valid amount.');
-                return;
+    const betModal = new ModalBuilder()
+        .setCustomId('betAmount')
+        .setTitle('Bet Amount');
+    
+    const betAmountInput = new TextInputBuilder()
+        .setCustomId('betAmountInput')
+        .setLabel("How much do you want to bet?")
+        .setStyle(TextInputStyle.Short);
+    
+    const firstActionRow = new ActionRowBuilder().addComponents(betAmountInput);
+    betModal.addComponents(firstActionRow);
+    
+    await interaction.showModal(betModal);
+    
+    const filter = i => i.customId === 'betAmount' && i.user.id === interaction.user.id;
+    
+    // modal input
+    const betAmount = await new Promise((resolve, reject) => {
+        interaction.client.once('interactionCreate', async (modalInteraction) => {
+            if (!filter(modalInteraction)) return reject('Invalid interaction');
+    
+            try {
+                const betAmount = parseInt(modalInteraction.fields.getTextInputValue('betAmountInput'));
+    
+                if (isNaN(betAmount) || betAmount <= 0) {
+                    await modalInteraction.reply('Please enter a valid amount.');
+                    return reject('Invalid amount');
+                } else {
+                    await modalInteraction.reply({content: 'Placing bet..', ephemeral: true} );
+                    resolve(betAmount);
+                }
+            } catch (error) {
+                modalInteraction.followUp('An error occurred while processing your bet.');
+                reject(error);
             }
-        }
+        });
+    });
 
-        const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
+    const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
 
-        if (betResult) {
-           await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2}`);
-           console.log(`${member.user.displayName} Bet won`);
+    if (betResult) {
+        await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
+        console.log(`${member.user.displayName} Bet won`);
         } else {
-           await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount}`);
+           await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
            console.log(`${member.user.displayName} Bet lost`);
         }
         
