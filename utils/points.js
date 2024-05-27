@@ -74,4 +74,4 @@ async function postPointsTest(points, memberID) {
         console.log(error)
     };
 }
-export default { addTimePoints, removePoints, removeTenPoints, pointsEnough };
+export default {removePoints, removeTenPoints, pointsEnough };

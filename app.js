@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle, time} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
-import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
+import {addTimePoints, addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
 import { isInLeagueGame, didWin, fiveMinuteCheck } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
