@@ -115,15 +115,15 @@ const convertGameTime = async(gameLength) => {
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-        // const id = await findMatchingID(players, user);
+        const id = await findMatchingID(players, user);
 
-        // if (!id) {
-        //     msgChannel("Invalid username");
-        //     return 0;
-        // }
+        if (!id) {
+            msgChannel("Invalid username");
+            return 0;
+        }
 
     // use this while testing 
-    const id = await getID('valentin', 'OCE');
+    // const id = await getID('valentin', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
