@@ -200,10 +200,15 @@ bot.on("interactionCreate", async (interaction) => {
         const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
     
         if (betResult) {
-            await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
+            const msg = `(${bold(member.user.displayName)} won ${betAmount * 2} petar points)`;
+            msgChannel(msg);
+            // await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
             console.log(`${member.user.displayName} Bet won`);
+
         } else {
-            await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
+            const msg = `(${bold(member.user.displayName)} lost ${betAmount} petar points)`;
+            msgChannel(msg);
+            // await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
             console.log(`${member.user.displayName} Bet lost`);
         }
     

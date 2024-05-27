@@ -123,7 +123,7 @@ export const isInLeagueGame = async(message, user) => {
         // }
 
     // use this while testing 
-    const id = await getID('Jason Lin', 'OCE');
+    const id = await getID('valentin', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -151,13 +151,10 @@ export const isInLeagueGame = async(message, user) => {
         userName: userData.riotId
         };
 
-        console.log(matchData);
-
-
         const gameTime = await convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (matchData.gameLength <= 600) {
+        if (matchData.gameLength <= 360) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
