@@ -212,11 +212,10 @@ export const hasGameEnded = async (match) => {
 // True if match is less than 5 minutes in
 export const fiveMinuteCheck = async (id, match) => {
     try {
-        console.log(`Checking if game has ended for ${match}`);
         const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
-        
+        console.log(`Game is currently ${data.gameLength}'s in progress`);
         if (data.gameLength < 360) {
             return true;
         }
