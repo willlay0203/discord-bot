@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle} from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle, time} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
@@ -153,7 +153,8 @@ bot.on("interactionCreate", async (interaction) => {
         }
 
         // check that the game hasnt exceeded 5 minutes
-        if (!fiveMinuteCheck(liveGameDetails.gameId)) {
+        const timeCheck = await fiveMinuteCheck(liveGameDetails.gameId)
+        if (!timeCheck) {
             interaction.reply(`Match has already exceeded 5 minutes`);
             return;
         }

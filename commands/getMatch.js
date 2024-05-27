@@ -39,8 +39,8 @@ const grabParticipantDataOngoing = (puuid, data) => {
         if (participant.puuid === puuid) {
             return participant;
         }
-        return null;
     }
+    return null;
 }
 
 /** Grab specific user data within a given COMPLETED match
@@ -98,7 +98,8 @@ const convertGameTime = async(gameLength) => {
 
         const gameMinutes = Math.floor(gameLength / 60);
         const gameSeconds = gameLength - gameMinutes * 60;
-
+        let gameTime = ''
+        
         if (gameMinutes < 0) {
             gameTime = "Loading Screen";
         }
@@ -106,22 +107,23 @@ const convertGameTime = async(gameLength) => {
         else {
             gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
         }
+
+        return gameTime;
 }
 
 /** Check if a given user is currently in a League match
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-        const id = await findMatchingID(players, user);
+        // const id = await findMatchingID(players, user);
 
-        if (!id) {
-            msgChannel("Invalid username");
-            return 0;
-        }
+        // if (!id) {
+        //     msgChannel("Invalid username");
+        //     return 0;
+        // }
 
     // use this while testing 
-    // const id = await getID('', '');
-
+    const id = await getID('Jason Lin', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -138,22 +140,24 @@ export const isInLeagueGame = async(message, user) => {
         }
 
         const data = await response.json();
-
+        const userData = grabParticipantDataOngoing(id, data);
         // Required match data as object
+
         let matchData = {
         gameType: data.gameType,
         gameMode: data.gameMode,
         gameLength: data.gameLength,
         gameId: data.gameId,
-        userData: grabParticipantDataOngoing(id, data),
         userName: userData.riotId
         };
 
+        console.log(matchData);
 
-        const gameTime = convertGameTime(matchData.gameLength);
-        const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (matchData.gameLength <= 360) {
+        const gameTime = await convertGameTime(matchData.gameLength);
+        const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
+
+        if (matchData.gameLength <= 600) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -186,6 +190,8 @@ export const isInLeagueGame = async(message, user) => {
         msgChannel('Error checking if the user is in game');
     }
 }
+
+
 
 
 // Check if a given game has ended
