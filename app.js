@@ -6,7 +6,7 @@ import addTimePoints, { addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
 import { isInLeagueGame, didWin, fiveMinuteCheck } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
-import { msgChannel } from './utils/msg.js';
+import { msgChannel, createBetModal } from './utils/msg.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -167,18 +167,7 @@ bot.on("interactionCreate", async (interaction) => {
     liveGameDetails.membersBet.push(member.id);
     console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
 
-    const betModal = new ModalBuilder()
-        .setCustomId('betAmount')
-        .setTitle('Bet Amount');
-    
-    const betAmountInput = new TextInputBuilder()
-        .setCustomId('betAmountInput')
-        .setLabel("How much do you want to bet?")
-        .setStyle(TextInputStyle.Short);
-    
-    const firstActionRow = new ActionRowBuilder().addComponents(betAmountInput);
-    betModal.addComponents(firstActionRow);
-    
+    const betModal = createBetModal();
     await interaction.showModal(betModal);
     
     const filter = i => i.customId === 'betAmount' && i.user.id === interaction.user.id;
@@ -205,22 +194,29 @@ bot.on("interactionCreate", async (interaction) => {
         });
     });
 
-    // pass to gamble.js to handle the bet
-    const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
-
-    if (betResult) {
-        await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
-        console.log(`${member.user.displayName} Bet won`);
+    // Pass to gamble.js to handle the bet
+    try {
+        const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
+    
+        if (betResult) {
+            await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
+            console.log(`${member.user.displayName} Bet won`);
         } else {
-           await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
-           console.log(`${member.user.displayName} Bet lost`);
+            await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
+            console.log(`${member.user.displayName} Bet lost`);
         }
-        
+    
+        // Reset liveGameDetails
         liveGameDetails.userId = '';
         liveGameDetails.gameId = '';
         liveGameDetails.membersBet = [];
-        
+    
+    } catch (error) {
+        console.error('Error handling bet:', error);
+        await interaction.followUp(`An error occurred while processing your bet. Please try again later.`);
     }
-})
+}}
+
+)
 
 bot.login(process.env.BOT_TOKEN);

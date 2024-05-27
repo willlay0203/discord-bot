@@ -39,7 +39,7 @@ const grabParticipantDataOngoing = (puuid, data) => {
         if (participant.puuid === puuid) {
             return participant;
         }
-
+        return null;
     }
 }
 
@@ -93,6 +93,21 @@ export const didWin = async (match, user) => {
     }
 };
 
+// Calculate minutes and seconds for display
+const convertGameTime = async(gameLength) => {
+
+        const gameMinutes = Math.floor(gameLength / 60);
+        const gameSeconds = gameLength - gameMinutes * 60;
+
+        if (gameMinutes < 0) {
+            gameTime = "Loading Screen";
+        }
+
+        else {
+            gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
+        }
+}
+
 /** Check if a given user is currently in a League match
  *  if they are print username, gamemode, and duration
 */
@@ -106,6 +121,7 @@ export const isInLeagueGame = async(message, user) => {
 
     // use this while testing 
     // const id = await getID('', '');
+
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -123,31 +139,21 @@ export const isInLeagueGame = async(message, user) => {
 
         const data = await response.json();
 
-        // Match data as variables
-        
-        const gameType = data.gameType;
-        const gameMode = data.gameMode;
-        const gameLength = data.gameLength;
-        const gameId = data.gameId;
-        const userData = grabParticipantDataOngoing(id, data);
-        const userName = userData.riotId;
-        // Calculate minutes and seconds for display
-        const gameMinutes = Math.floor(gameLength / 60);
-        const gameSeconds = gameLength - gameMinutes * 60;
-        let gameTime = '';
-        
-        // Loading screen check     
-        if (gameMinutes < 0) {
-            gameTime = "Loading Screen";
-        }
+        // Required match data as object
+        let matchData = {
+        gameType: data.gameType,
+        gameMode: data.gameMode,
+        gameLength: data.gameLength,
+        gameId: data.gameId,
+        userData: grabParticipantDataOngoing(id, data),
+        userName: userData.riotId
+        };
 
-        else {
-            gameTime = `${gameMinutes} minutes and ${gameSeconds} seconds`;           
-        }
 
+        const gameTime = convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${userName} \n**Game Mode:** ${gameMode} \n**Game Duration:** ${gameTime}\n`;
 
-        if (gameLength <= 360) {
+        if (matchData.gameLength <= 360) {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -161,10 +167,10 @@ export const isInLeagueGame = async(message, user) => {
             const row = new ActionRowBuilder()
                 .addComponents(betWin, betLoss);
 
-                await message.channel.send({
+            await message.channel.send({
                     content: msg,
                     components: [row]
-                });
+            });
         }
 
         else {
@@ -173,12 +179,11 @@ export const isInLeagueGame = async(message, user) => {
         });
     }
 
-        return { gameId , id};
+        return { gameId: matchData.gameId, id: id};
 
     } catch(error) {
         console.error("Error:", error);
-        console.log("If 403 unauth check LOL api key");
-        msgChannel('oops bug');
+        msgChannel('Error checking if the user is in game');
     }
 }
 
