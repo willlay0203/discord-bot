@@ -105,6 +105,9 @@ bot.on("messageCreate", async (message) => {
 
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
+                if (leagueDetails.gameTime === 'Loading Screen') {
+                    return;
+                }
 
                 if (leagueDetails != 0) {
                     liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
@@ -155,6 +158,11 @@ bot.on("interactionCreate", async (interaction) => {
         // check that match id exists
         if (liveGameDetails.gameId === '') {
             interaction.reply(`Match has already ended`);
+            return;
+        }
+        
+        if (liveGameDetails.gameTime === 'Loading Screen') {
+            interaction.reply('Game is in loading screen');
             return;
         }
 

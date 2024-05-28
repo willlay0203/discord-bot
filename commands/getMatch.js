@@ -100,8 +100,9 @@ const convertGameTime = async(gameLength) => {
         const gameSeconds = gameLength - gameMinutes * 60;
         let gameTime = ''
         
-        if (gameMinutes < 0) {
+        if (gameLength < 0) {
             gameTime = "Loading Screen";
+            return gameTime;
         }
 
         else {
@@ -153,6 +154,12 @@ export const isInLeagueGame = async(message, user) => {
 
         const gameTime = await convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
+        
+        if (gameTime === 'Loading Screen') {
+            await message.channel.send({
+                content: msg,
+            });
+        }
 
         if (matchData.gameLength <= 360) {
             const betWin = new ButtonBuilder()
@@ -180,7 +187,7 @@ export const isInLeagueGame = async(message, user) => {
         });
     }
 
-        return { gameId: matchData.gameId, id: id};
+        return { gameId: matchData.gameId, id: id, gameTime: gameTime};
 
     } catch(error) {
         console.error("Error:", error);
