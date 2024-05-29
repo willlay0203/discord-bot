@@ -188,18 +188,18 @@ bot.on("interactionCreate", async (interaction) => {
             return;
         }
 
-        // check that the game hasnt exceeded 5 minutes
-        const timeCheck = await fiveMinuteCheck(liveGameDetails.gameId)
-        if (!timeCheck) {
-            interaction.reply(`Match has already exceeded 5 minutes`);
-            return;
-        }
-
         // one bet per match id
         if (liveGameDetails.membersBet.includes(member.id)) {
             interaction.reply(`${bold(member.user.displayName)} you've already bet on this match`);
             return;
-        };
+        };        
+
+        // check that the game hasnt exceeded 5 minutes
+        const timeCheck = await fiveMinuteCheck(liveGameDetails.userId);
+        if (!timeCheck) {
+            interaction.reply(`Match has already exceeded 5 minutes`);
+            return;
+        }
 
     liveGameDetails.membersBet.push(member.id);
     console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
