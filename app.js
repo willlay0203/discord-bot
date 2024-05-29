@@ -71,6 +71,7 @@ function eventTimer() {
         eventTimer();
       }, intervalTime);
 }
+
 eventTimer()
 
 let liveGameDetails = {
@@ -78,6 +79,27 @@ let liveGameDetails = {
     userId: '',
     membersBet: []
 };
+
+function resetLiveGameDetails() {
+    liveGameDetails = {
+      gameId: '',
+      userId: '',
+      membersBet: []
+    };
+    console.log('liveGameDetails have been reset');
+  }
+  
+
+function checkLiveGameDetails() {
+    if (!liveGameDetails || !liveGameDetails.gameId || !liveGameDetails.userId) {
+      console.error('liveGameDetails is undefined or missing critical fields. Resetting...');
+      resetLiveGameDetails();
+    } else {
+      console.log('liveGameDetails is valid');
+    }
+  }
+
+setInterval(checkLiveGameDetails, 180000);
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
