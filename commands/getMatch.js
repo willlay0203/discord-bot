@@ -100,8 +100,9 @@ const convertGameTime = async(gameLength) => {
         const gameSeconds = gameLength - gameMinutes * 60;
         let gameTime = ''
         
-        if (gameMinutes < 0) {
+        if (gameLength < 0) {
             gameTime = "Loading Screen";
+            return gameTime;
         }
 
         else {
@@ -153,6 +154,13 @@ export const isInLeagueGame = async(message, user) => {
 
         const gameTime = await convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
+        console.log(data.gameLength);
+        if (gameTime === 'Loading Screen') {
+            await message.channel.send({
+                content: msg,
+            });
+            return { gameId: matchData.gameId, id: id, gameTime: gameTime};
+        }
 
         if (matchData.gameLength <= 360) {
             const betWin = new ButtonBuilder()
@@ -180,7 +188,7 @@ export const isInLeagueGame = async(message, user) => {
         });
     }
 
-        return { gameId: matchData.gameId, id: id};
+        return { gameId: matchData.gameId, id: id, gameTime: gameTime};
 
     } catch(error) {
         console.error("Error:", error);
@@ -215,7 +223,7 @@ export const fiveMinuteCheck = async (id, match) => {
         const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
-        console.log(`Game is currently ${data.gameLength}'s in progress`);
+        console.log(`Game is currently ${data.gameLength} seconds in progress`);
         if (data.gameLength < 360) {
             return true;
         }

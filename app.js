@@ -71,6 +71,7 @@ function eventTimer() {
         eventTimer();
       }, intervalTime);
 }
+
 eventTimer()
 
 let liveGameDetails = {
@@ -78,6 +79,27 @@ let liveGameDetails = {
     userId: '',
     membersBet: []
 };
+
+function resetLiveGameDetails() {
+    liveGameDetails = {
+      gameId: '',
+      userId: '',
+      membersBet: []
+    };
+    console.log('liveGameDetails have been reset');
+  }
+  
+
+function checkLiveGameDetails() {
+    if (!liveGameDetails || !liveGameDetails.gameId || !liveGameDetails.userId) {
+      console.error('liveGameDetails is undefined or missing critical fields. Resetting...');
+      resetLiveGameDetails();
+    } else {
+      console.log('liveGameDetails is valid');
+    }
+  }
+
+setInterval(checkLiveGameDetails, 180000);
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -105,6 +127,9 @@ bot.on("messageCreate", async (message) => {
 
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
+                if (leagueDetails.gameTime === 'Loading Screen') {
+                    return;
+                }
 
                 if (leagueDetails != 0) {
                     liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
@@ -157,11 +182,9 @@ bot.on("interactionCreate", async (interaction) => {
             interaction.reply(`Match has already ended`);
             return;
         }
-
-        // check that the game hasnt exceeded 5 minutes
-        const timeCheck = await fiveMinuteCheck(liveGameDetails.gameId)
-        if (!timeCheck) {
-            interaction.reply(`Match has already exceeded 5 minutes`);
+        
+        if (liveGameDetails.gameTime === 'Loading Screen') {
+            interaction.reply('Game is in loading screen');
             return;
         }
 
@@ -169,7 +192,14 @@ bot.on("interactionCreate", async (interaction) => {
         if (liveGameDetails.membersBet.includes(member.id)) {
             interaction.reply(`${bold(member.user.displayName)} you've already bet on this match`);
             return;
-        };
+        };        
+
+        // check that the game hasnt exceeded 5 minutes
+        const timeCheck = await fiveMinuteCheck(liveGameDetails.userId);
+        if (!timeCheck) {
+            interaction.reply(`Match has already exceeded 5 minutes`);
+            return;
+        }
 
     liveGameDetails.membersBet.push(member.id);
     console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
