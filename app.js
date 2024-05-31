@@ -4,7 +4,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import {addTimePoints, addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
-import { isInLeagueGame, didWin, fiveMinuteCheck } from './commands/getMatch.js'
+import { isInLeagueGame, didWin, fiveMinuteCheck, hasGameEnded } from './commands/getMatch.js'
 import { handleBet } from './features/gamble.js';
 import { msgChannel, createBetModal } from './utils/msg.js';
 
@@ -90,11 +90,20 @@ function resetLiveGameDetails() {
   }
   
 
-function checkLiveGameDetails() {
-    if (!liveGameDetails || !liveGameDetails.gameId || !liveGameDetails.userId) {
+async function checkLiveGameDetails() {
+
+    if (!liveGameDetails) {
       console.error('liveGameDetails is undefined or missing critical fields. Resetting...');
       resetLiveGameDetails();
-    } else {
+    }
+
+    const gameEnded = await hasGameEnded();
+    if (gameEnded) {
+        console.error('Game ended with no live bets.. Resetting...');
+        resetLiveGameDetails();
+    } 
+
+    else {
       console.log('liveGameDetails is valid');
     }
   }
@@ -120,6 +129,10 @@ bot.on("messageCreate", async (message) => {
                 return;
             }
 
+            if (liveGameDetails.membersBet.length === 0) {
+                resetLiveGameDetails();
+            }
+            
             if (liveGameDetails.gameId != '') {
                 msgChannel("There is already a bet in progress!");
                 return;
