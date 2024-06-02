@@ -183,9 +183,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
         else {
-        await message.channel.send({
-            content: msg,
-        });
+        await msgChannel(msg);
     }
 
         return { gameId: matchData.gameId, id: id, gameTime: gameTime};
