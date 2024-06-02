@@ -224,24 +224,36 @@ bot.on("interactionCreate", async (interaction) => {
     
     // modal input
     const betAmount = await new Promise((resolve, reject) => {
-        interaction.client.once('interactionCreate', async (modalInteraction) => {
-            if (!filter(modalInteraction)) return reject('Invalid interaction');
-    
+        const interactionHandler = async (modalInteraction) => {
+            if (!filter(modalInteraction)) return;
+
             try {
                 const betAmount = parseInt(modalInteraction.fields.getTextInputValue('betAmountInput'));
-    
+
                 if (isNaN(betAmount) || betAmount <= 0) {
                     await modalInteraction.reply('Please enter a valid amount.');
-                    return reject('Invalid amount');
+                    reject('Invalid amount');
                 } else {
-                    await modalInteraction.reply({content: 'Placing bet..', ephemeral: true} );
+                    await modalInteraction.reply({content: 'Placing bet..', ephemeral: true});
                     resolve(betAmount);
                 }
             } catch (error) {
-                modalInteraction.followUp('An error occurred while processing your bet.');
+                await modalInteraction.followUp('An error occurred while processing your bet.');
                 reject(error);
+            } finally {
+                // Cleanup the event listener to avoid memory leaks
+                interaction.client.off('interactionCreate', interactionHandler);
             }
-        });
+        };
+
+        // Register the event listener
+        interaction.client.on('interactionCreate', interactionHandler);
+
+        // Optionally, you can set a timeout to reject the promise if no interaction occurs within a certain timeframe
+        setTimeout(() => {
+            interaction.client.off('interactionCreate', interactionHandler);
+            reject('Timeout waiting for interaction');
+        }, 60000); // 60 seconds timeout
     });
 
     // Pass to gamble.js to handle the bet
