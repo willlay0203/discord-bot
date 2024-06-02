@@ -214,7 +214,6 @@ bot.on("interactionCreate", async (interaction) => {
             return;
         }
 
-    liveGameDetails.membersBet.push(member.id);
     console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
 
     const betModal = createBetModal();
@@ -234,6 +233,7 @@ bot.on("interactionCreate", async (interaction) => {
                     await modalInteraction.reply('Please enter a valid amount.');
                     reject('Invalid amount');
                 } else {
+                    liveGameDetails.membersBet.push(member.id);
                     await modalInteraction.reply({content: 'Placing bet..', ephemeral: true});
                     resolve(betAmount);
                 }
@@ -242,18 +242,17 @@ bot.on("interactionCreate", async (interaction) => {
                 reject(error);
             } finally {
                 // Cleanup the event listener to avoid memory leaks
+                
                 interaction.client.off('interactionCreate', interactionHandler);
             }
         };
 
-        // Register the event listener
         interaction.client.on('interactionCreate', interactionHandler);
 
-        // Optionally, you can set a timeout to reject the promise if no interaction occurs within a certain timeframe
         setTimeout(() => {
             interaction.client.off('interactionCreate', interactionHandler);
             reject('Timeout waiting for interaction');
-        }, 60000); // 60 seconds timeout
+        }, 60000);
     });
 
     // Pass to gamble.js to handle the bet
@@ -272,11 +271,8 @@ bot.on("interactionCreate", async (interaction) => {
             // await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
             console.log(`${member.user.displayName} Bet lost`);
         }
-    
-        // Reset liveGameDetails
-        liveGameDetails.userId = '';
-        liveGameDetails.gameId = '';
-        liveGameDetails.membersBet = [];
+
+        resetLiveGameDetails();
     
     } catch (error) {
         console.error('Error handling bet:', error);
