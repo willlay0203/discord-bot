@@ -120,9 +120,6 @@ bot.on("messageCreate", async (message) => {
 
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
-                if (leagueDetails.gameTime === 'Loading Screen') {
-                    return;
-                }
 
                 if (leagueDetails != 0) {
                     liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
