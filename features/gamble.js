@@ -20,9 +20,9 @@ const checkBet = async (match, predictedResult, userId, member) => {
             if (betOutcome === predictedResult) {
                 return true;
             }  
-            // if (betOutcome === 'remake') {
-            //     return 'remake';
-            // }
+            if (betOutcome === 'remake') {
+                return 'remake';
+            }
             return false;
         }
         // Minute checks
@@ -62,10 +62,10 @@ export const handleBet = async (interaction, match, userId, betAmount) => {
         if (betResult === true) {
             addPoints(betAmount * 2, member);
         }
-        // if (betResult === 'remake') {
-        //     console.log(`${member.user.displayName}'s bet was a remake. Refund ${betAmount} points.`);
-        //     addPoints(betAmount, member);
-        // }
+        if (betResult === 'remake') {
+            console.log(`${member.user.displayName}'s bet was a remake. Refund ${betAmount} points.`);
+            addPoints(betAmount, member);
+        }
         return betResult;
     }
 };
