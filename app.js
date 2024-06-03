@@ -203,19 +203,25 @@ bot.on("interactionCreate", async (interaction) => {
         await interaction.followUp(`You dont have enough points for this bet!`);
         return;
     }
-    
+
     liveGameDetails.membersBet.push(member.id);
 
     // Pass to gamble.js to handle the bet
     try {
         const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
 
-        if (betResult) {
+        if (betResult === true) {
             const msg = `${bold(member.user.displayName)} won ${betAmount * 2} petar points`;
             msgChannel(msg);
             console.log(`${member.user.displayName} Bet won`);
-
-        } else {
+        }
+        if (betResult === remake) {
+            const msg = `Game was a remake. ${bold(member.user.displayName)} was refunded ${betAmount} petar points`;
+            msgChannel(msg);
+            console.log(`${member.user.displayName} Bet remake`);   
+        }
+        
+        else {
             const msg = `${bold(member.user.displayName)} lost ${betAmount} petar points`;
             msgChannel(msg);
             console.log(`${member.user.displayName} Bet lost`);

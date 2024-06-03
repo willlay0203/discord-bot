@@ -18,9 +18,11 @@ const checkBet = async (match, predictedResult, userId, member) => {
 
             if (betOutcome === predictedResult) {
                 return true;
-            } else {
-                return false;
+            }  
+            if (betOutcome === 'remake') {
+                return 'remake';
             }
+            return false;
         }
         // Minute checks
         await new Promise(resolve => setTimeout(resolve, 60 * 1000));
@@ -56,8 +58,12 @@ export const handleBet = async (interaction, match, userId, betAmount) => {
         await interaction.followUp(`**${member.user.displayName} placed a bet of ${betAmount} for a ${predictedResult}**`);
         removePoints(betAmount, member);
         const betResult = await checkBet(match, predictedResult, userId, member);
-        if (betResult) {
+        if (betResult === true) {
             addPoints(betAmount * 2, member);
+        }
+        if (betResult === 'remake') {
+            console.log(`${member.user.displayName}'s bet was a remake. Refund ${betAmount} points.`);
+            addPoints(betAmount, member);
         }
         return betResult;
     }
