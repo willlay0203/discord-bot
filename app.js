@@ -120,9 +120,6 @@ bot.on("messageCreate", async (message) => {
 
             try {
                 const leagueDetails = await isInLeagueGame(message, argument);
-                if (leagueDetails.gameTime === 'Loading Screen') {
-                    return;
-                }
 
                 if (leagueDetails != 0) {
                     liveGameDetails.gameId = `OC1_${leagueDetails.gameId}`;
@@ -215,11 +212,11 @@ bot.on("interactionCreate", async (interaction) => {
             msgChannel(msg);
             console.log(`${member.user.displayName} Bet won`);
         }
-        if (betResult === remake) {
-            const msg = `Game was a remake. ${bold(member.user.displayName)} was refunded ${betAmount} petar points`;
-            msgChannel(msg);
-            console.log(`${member.user.displayName} Bet remake`);   
-        }
+        // if (betResult === remake) {
+        //     const msg = `Game was a remake. ${bold(member.user.displayName)} was refunded ${betAmount} petar points`;
+        //     msgChannel(msg);
+        //     console.log(`${member.user.displayName} Bet remake`);   
+        // }
         
         else {
             const msg = `${bold(member.user.displayName)} lost ${betAmount} petar points`;
