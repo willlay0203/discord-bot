@@ -22,8 +22,8 @@ const checkBet = async (match, predictedResult, userId, member) => {
                 return false;
             }
         }
-        // 3 minute checks
-        await new Promise(resolve => setTimeout(resolve, 3 * 60 * 1000));
+        // Minute checks
+        await new Promise(resolve => setTimeout(resolve, 60 * 1000));
     }
     console.log('Maximum checks reached');
     return false;
@@ -53,4 +53,54 @@ export const handleBet = async (interaction, match, userId, betAmount) => {
     }
 };
 
-export default handleBet;
+// handle the modal
+export async function handleBetModal(interaction, member, liveGameDetails) {
+    const filter = i => i.customId === 'betAmount' && i.user.id === interaction.user.id;
+    let betAmount = 0;
+
+    try {
+        betAmount = await new Promise((resolve, reject) => {
+            const interactionHandler = async (modalInteraction) => {
+                if (!filter(modalInteraction)) return;
+
+                try {
+                    betAmount = parseInt(modalInteraction.fields.getTextInputValue('betAmountInput'));
+                    if (isNaN(betAmount) || betAmount <= 0) {
+                        await modalInteraction.reply('Please enter a valid amount.');
+                        reject('Invalid amount');
+                    } else {
+                        console.log(`${member.displayName} has bet ${betAmount} on match ${liveGameDetails.gameId}`);
+                        await modalInteraction.reply({ content: 'Placing bet..', ephemeral: true });
+                        resolve(betAmount);
+                    }
+                } catch (error) {
+                    await modalInteraction.reply('An error occurred while processing your bet.');
+                    reject(error);
+                } finally {
+                    interaction.client.off('interactionCreate', interactionHandler);
+                }
+            };
+
+            interaction.client.on('interactionCreate', interactionHandler);
+
+            setTimeout(() => {
+                interaction.client.off('interactionCreate', interactionHandler);
+                reject('Timeout waiting for interaction');
+            }, 10000);
+        });
+
+        console.log(`Bet amount resolved: ${betAmount}`);
+        return betAmount;
+    } catch (error) {
+        if (error === 'Timeout waiting for interaction') {
+            console.log('No interaction received within the time limit.');
+            return null;
+        } else {
+            console.error('Modal Error', error);
+            return null;
+        }
+    }
+}
+
+
+export default {handleBet, handleBetModal};

@@ -116,15 +116,15 @@ const convertGameTime = async(gameLength) => {
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-        const id = await findMatchingID(players, user);
+    //     const id = await findMatchingID(players, user);
 
-        if (!id) {
-            msgChannel("Invalid username");
-            return 0;
-        }
+    //     if (!id) {
+    //         msgChannel("Invalid username");
+    //         return 0;
+    //     }
 
     // use this while testing 
-    // const id = await getID('valentin', 'OCE');
+    const id = await getID('214', 'coe');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -162,7 +162,7 @@ export const isInLeagueGame = async(message, user) => {
             return { gameId: matchData.gameId, id: id, gameTime: gameTime};
         }
 
-        if (matchData.gameLength <= 360) {
+        if (matchData.gameLength <= 5000 || matchData.gameLength === 'Loading Screen') {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -214,15 +214,15 @@ export const hasGameEnded = async (match) => {
     }
 }
 
-// Five minute check for gambling
-// True if match is less than 5 minutes in
-export const fiveMinuteCheck = async (id, match) => {
+// Time check for gambling
+// True if game length is less than 'time'
+export const timeCheck = async (id, time) => {
     try {
         const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
         console.log(`Game is currently ${data.gameLength} seconds in progress`);
-        if (data.gameLength < 360) {
+        if (data.gameLength < time) {
             return true;
         }
 
@@ -235,4 +235,4 @@ export const fiveMinuteCheck = async (id, match) => {
     }
 }
 
-export default {isInLeagueGame, hasGameEnded, fiveMinuteCheck};
+export default {isInLeagueGame, hasGameEnded, timeCheck};

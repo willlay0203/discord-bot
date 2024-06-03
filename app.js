@@ -4,8 +4,8 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import {addTimePoints, addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
-import { isInLeagueGame, didWin, fiveMinuteCheck, hasGameEnded } from './commands/getMatch.js'
-import { handleBet } from './features/gamble.js';
+import { isInLeagueGame, didWin, timeCheck, hasGameEnded } from './commands/getMatch.js'
+import { handleBet, handleBetModal } from './features/gamble.js';
 import { msgChannel, createBetModal } from './utils/msg.js';
 
 dotenv.config();
@@ -89,7 +89,7 @@ function resetLiveGameDetails() {
     console.log('liveGameDetails have been reset');
   }
   
-
+// probably not required
 async function checkLiveGameDetails() {
 
     if (!liveGameDetails) {
@@ -108,7 +108,8 @@ async function checkLiveGameDetails() {
     }
   }
 
-setInterval(checkLiveGameDetails, 180000);
+// probably not needed for now
+// setInterval(checkLiveGameDetails, 180000);
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -192,14 +193,9 @@ bot.on("interactionCreate", async (interaction) => {
 
         // check that match id exists
         if (liveGameDetails.gameId === '') {
-            interaction.reply(`Match has already ended`);
+            interaction.reply(`No live match in progress`);
             return;
-        }
-        
-        if (liveGameDetails.gameTime === 'Loading Screen') {
-            interaction.reply('Game is in loading screen');
-            return;
-        }
+        };
 
         // one bet per match id
         if (liveGameDetails.membersBet.includes(member.id)) {
@@ -207,68 +203,36 @@ bot.on("interactionCreate", async (interaction) => {
             return;
         };        
 
-        // check that the game hasnt exceeded 5 minutes
-        const timeCheck = await fiveMinuteCheck(liveGameDetails.userId);
-        if (!timeCheck) {
+        // check that the game hasnt exceeded 3 minutes
+        const timeExceeded = await timeCheck(liveGameDetails.userId, 1800);
+        if (!timeExceeded) {
             interaction.reply(`Match has already exceeded 5 minutes`);
             return;
-        }
-
-    console.log(`${member.displayName}  has bet on match ${liveGameDetails.gameId}`);
+        };
 
     const betModal = createBetModal();
     await interaction.showModal(betModal);
-    
-    const filter = i => i.customId === 'betAmount' && i.user.id === interaction.user.id;
-    
-    // modal input
-    const betAmount = await new Promise((resolve, reject) => {
-        const interactionHandler = async (modalInteraction) => {
-            if (!filter(modalInteraction)) return;
+    const betAmount = await handleBetModal(interaction, member, liveGameDetails);
 
-            try {
-                const betAmount = parseInt(modalInteraction.fields.getTextInputValue('betAmountInput'));
+    if (betAmount === null) {
+        return;
+    }
 
-                if (isNaN(betAmount) || betAmount <= 0) {
-                    await modalInteraction.reply('Please enter a valid amount.');
-                    reject('Invalid amount');
-                } else {
-                    liveGameDetails.membersBet.push(member.id);
-                    await modalInteraction.reply({content: 'Placing bet..', ephemeral: true});
-                    resolve(betAmount);
-                }
-            } catch (error) {
-                await modalInteraction.followUp('An error occurred while processing your bet.');
-                reject(error);
-            } finally {
-                // Cleanup the event listener to avoid memory leaks
-                
-                interaction.client.off('interactionCreate', interactionHandler);
-            }
-        };
+    liveGameDetails.membersBet.push(member.id);
 
-        interaction.client.on('interactionCreate', interactionHandler);
-
-        setTimeout(() => {
-            interaction.client.off('interactionCreate', interactionHandler);
-            reject('Timeout waiting for interaction');
-        }, 60000);
-    });
 
     // Pass to gamble.js to handle the bet
     try {
         const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
     
         if (betResult) {
-            const msg = `(${bold(member.user.displayName)} won ${betAmount * 2} petar points)`;
+            const msg = `${bold(member.user.displayName)} won ${betAmount * 2} petar points`;
             msgChannel(msg);
-            // await interaction.followUp(`${bold(member.user.displayName)} won ${betAmount * 2} petar points`);
             console.log(`${member.user.displayName} Bet won`);
 
         } else {
-            const msg = `(${bold(member.user.displayName)} lost ${betAmount} petar points)`;
+            const msg = `${bold(member.user.displayName)} lost ${betAmount} petar points`;
             msgChannel(msg);
-            // await interaction.followUp(`${bold(member.user.displayName)} lost ${betAmount} petar points`);
             console.log(`${member.user.displayName} Bet lost`);
         }
 
