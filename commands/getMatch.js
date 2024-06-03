@@ -76,11 +76,16 @@ export const didWin = async (match, user) => {
 
         const matchData = await response.json();
         const participant = grabParticipantDataCompleted(user, matchData);
+        const gameLength = data.gameLength;
 
         if (!participant) {
             console.log("didWin - Participant not found");
             return false;
         }
+
+        // if (gameLength < 500) {
+        //     return 'remake';
+        // }
 
         if (participant.win === true) {
             return 'win';
@@ -193,8 +198,6 @@ export const isInLeagueGame = async(message, user) => {
         msgChannel('Error checking if the user is in game');
     }
 }
-
-
 
 
 // Check if a given game has ended

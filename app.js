@@ -185,7 +185,7 @@ bot.on("interactionCreate", async (interaction) => {
         // check that the game hasnt exceeded 3 minutes
         const timeExceeded = await timeCheck(liveGameDetails.userId, 180);
         if (!timeExceeded) {
-            interaction.reply(`Match has already exceeded 5 minutes`);
+            interaction.reply(`Match has already exceeded 3 minutes`);
             return;
         };
 
@@ -203,6 +203,7 @@ bot.on("interactionCreate", async (interaction) => {
         await interaction.followUp(`You dont have enough points for this bet!`);
         return;
     }
+    
     liveGameDetails.membersBet.push(member.id);
 
     // Pass to gamble.js to handle the bet

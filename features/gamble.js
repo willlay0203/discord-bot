@@ -96,7 +96,7 @@ export async function handleBetModal(interaction, member, liveGameDetails) {
             setTimeout(() => {
                 interaction.client.off('interactionCreate', interactionHandler);
                 reject('Timeout waiting for interaction');
-            }, 10000);
+            }, 60000);
         });
 
         console.log(`Bet amount resolved: ${betAmount}`);
