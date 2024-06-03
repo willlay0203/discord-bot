@@ -76,7 +76,7 @@ export const didWin = async (match, user) => {
 
         const matchData = await response.json();
         const participant = grabParticipantDataCompleted(user, matchData);
-        const gameLength = data.gameLength;
+        const gameLength = matchData.gameLength;
 
         if (!participant) {
             console.log("didWin - Participant not found");
