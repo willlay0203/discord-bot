@@ -82,7 +82,7 @@ export async function handleBetModal(interaction, member, liveGameDetails) {
 
                 try {
                     betAmount = parseInt(modalInteraction.fields.getTextInputValue('betAmountInput'));
-                    if (isNaN(betAmount) || betAmount <= 0) {
+                    if (isNaN(betAmount) || betAmount <= 0 || betAmount > 10000) {
                         await modalInteraction.reply('Please enter a valid amount.');
                         reject('Invalid amount');
                     } else {
