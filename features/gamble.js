@@ -1,4 +1,4 @@
-import { bold } from 'discord.js';
+import { bold, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { hasGameEnded, didWin} from '../commands/getMatch.js'
 import { addPoints, removePoints, pointsEnough } from '../utils/points.js';
 
@@ -50,13 +50,6 @@ export const createBetModal = () => {
 // if the user's point count is enough place the bet
 export const handleBet = async (interaction, match, userId, betAmount) => {
     let member = interaction.member;
-    const hasEnoughPoints = await pointsEnough(interaction.member.id, betAmount);
-
-    if (!hasEnoughPoints) {
-        console.log(`${interaction.member.id}'s points weren't enough to the bet`);
-        await interaction.followUp(`You dont have enough points for this bet!`);
-        return false;
-    }
     
     if (interaction.customId === 'win' || interaction.customId === 'loss') {
         const predictedResult = interaction.customId;

@@ -7,6 +7,7 @@ import createEmbed from './features/treasure.js';
 import { isInLeagueGame, didWin, timeCheck, hasGameEnded } from './commands/getMatch.js'
 import { handleBet, handleBetModal, createBetModal } from './features/gamble.js';
 import { msgChannel } from './utils/msg.js';
+import { pointsEnough } from './utils/points.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -88,28 +89,6 @@ function resetLiveGameDetails() {
     };
     console.log('liveGameDetails have been reset');
   }
-  
-// probably not required
-async function checkLiveGameDetails() {
-
-    if (!liveGameDetails) {
-      console.error('liveGameDetails is undefined or missing critical fields. Resetting...');
-      resetLiveGameDetails();
-    }
-
-    const gameEnded = await hasGameEnded();
-    if (gameEnded) {
-        console.error('Game ended with no live bets.. Resetting...');
-        resetLiveGameDetails();
-    } 
-
-    else {
-      console.log('liveGameDetails is valid');
-    }
-  }
-
-// not needed for now
-// setInterval(checkLiveGameDetails, 180000);
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -214,17 +193,22 @@ bot.on("interactionCreate", async (interaction) => {
     await interaction.showModal(betModal);
     const betAmount = await handleBetModal(interaction, member, liveGameDetails);
 
-    if (betAmount === null) {
+    if (betAmount === null || betAmount <= 0) {
         return;
     }
 
+    const hasEnoughPoints = await pointsEnough(interaction.member.id, betAmount);
+    if (!hasEnoughPoints) {
+        console.log(`${interaction.member.id}'s points weren't enough to the bet`);
+        await interaction.followUp(`You dont have enough points for this bet!`);
+        return;
+    }
     liveGameDetails.membersBet.push(member.id);
-
 
     // Pass to gamble.js to handle the bet
     try {
         const betResult = await handleBet(interaction, liveGameDetails.gameId, liveGameDetails.userId, betAmount);
-    
+
         if (betResult) {
             const msg = `${bold(member.user.displayName)} won ${betAmount * 2} petar points`;
             msgChannel(msg);

@@ -124,7 +124,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
     // use this while testing 
-    // const id = await getID('214', 'coe');
+    // const id = await getID('', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
