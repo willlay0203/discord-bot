@@ -219,7 +219,7 @@ bot.on("interactionCreate", async (interaction) => {
             console.log(`${member.user.displayName} Bet remake`);   
         }
         
-        else {
+        if (betResult === false) {
             const msg = `${bold(member.user.displayName)} lost ${betAmount} petar points`;
             msgChannel(msg);
             console.log(`${member.user.displayName} Bet lost`);
