@@ -11,20 +11,3 @@ export const msgChannel = (message, channelId = DEFAULT_CHANNEL_ID) => {
     const channel = bot.channels.cache.get(channelId);
     channel.send(message);
 }
-
-// create modal for gamble feature
-export const createBetModal = () => {
-    const betModal = new ModalBuilder()
-        .setCustomId('betAmount')
-        .setTitle('Bet Amount');
-    
-    const betAmountInput = new TextInputBuilder()
-        .setCustomId('betAmountInput')
-        .setLabel("How much do you want to bet?")
-        .setStyle(TextInputStyle.Short);
-    
-    const firstActionRow = new ActionRowBuilder().addComponents(betAmountInput);
-    betModal.addComponents(firstActionRow);
-
-    return betModal;
-}

@@ -76,10 +76,15 @@ export const didWin = async (match, user) => {
 
         const matchData = await response.json();
         const participant = grabParticipantDataCompleted(user, matchData);
+        const gameLength = data.gameLength;
 
         if (!participant) {
             console.log("didWin - Participant not found");
             return false;
+        }
+
+        if (gameLength <= 500) {
+            return 'remake';
         }
 
         if (participant.win === true) {
@@ -124,7 +129,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
     // use this while testing 
-    // const id = await getID('valentin', 'OCE');
+    // const id = await getID('', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -155,14 +160,14 @@ export const isInLeagueGame = async(message, user) => {
         const gameTime = await convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
         console.log(data.gameLength);
-        if (gameTime === 'Loading Screen') {
-            await message.channel.send({
-                content: msg,
-            });
-            return { gameId: matchData.gameId, id: id, gameTime: gameTime};
-        }
+        // if (gameTime === 'Loading Screen') {
+        //     await message.channel.send({
+        //         content: msg,
+        //     });
+        //     return { gameId: matchData.gameId, id: id, gameTime: gameTime};
+        // }
 
-        if (matchData.gameLength <= 360) {
+        if (matchData.gameLength <= 180 || gameTime === 'Loading Screen') {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -183,7 +188,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
         else {
-        await msgChannel(msg);
+        msgChannel(msg);
     }
 
         return { gameId: matchData.gameId, id: id, gameTime: gameTime};
@@ -193,8 +198,6 @@ export const isInLeagueGame = async(message, user) => {
         msgChannel('Error checking if the user is in game');
     }
 }
-
-
 
 
 // Check if a given game has ended
@@ -214,15 +217,15 @@ export const hasGameEnded = async (match) => {
     }
 }
 
-// Five minute check for gambling
-// True if match is less than 5 minutes in
-export const fiveMinuteCheck = async (id, match) => {
+// Time check for gambling
+// True if game length is less than 'time'
+export const timeCheck = async (id, time) => {
     try {
         const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
         console.log(`Game is currently ${data.gameLength} seconds in progress`);
-        if (data.gameLength < 360) {
+        if (data.gameLength < time) {
             return true;
         }
 
@@ -235,4 +238,4 @@ export const fiveMinuteCheck = async (id, match) => {
     }
 }
 
-export default {isInLeagueGame, hasGameEnded, fiveMinuteCheck};
+export default {isInLeagueGame, hasGameEnded, timeCheck};
