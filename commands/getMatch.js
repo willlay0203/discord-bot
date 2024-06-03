@@ -155,12 +155,12 @@ export const isInLeagueGame = async(message, user) => {
         const gameTime = await convertGameTime(matchData.gameLength);
         const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
         console.log(data.gameLength);
-        if (gameTime === 'Loading Screen') {
-            await message.channel.send({
-                content: msg,
-            });
-            return { gameId: matchData.gameId, id: id, gameTime: gameTime};
-        }
+        // if (gameTime === 'Loading Screen') {
+        //     await message.channel.send({
+        //         content: msg,
+        //     });
+        //     return { gameId: matchData.gameId, id: id, gameTime: gameTime};
+        // }
 
         if (matchData.gameLength <= 180 || gameTime === 'Loading Screen') {
             const betWin = new ButtonBuilder()

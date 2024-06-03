@@ -29,6 +29,23 @@ const checkBet = async (match, predictedResult, userId, member) => {
     return false;
 };
 
+// create modal for gamble feature
+export const createBetModal = () => {
+    const betModal = new ModalBuilder()
+        .setCustomId('betAmount')
+        .setTitle('Bet Amount');
+    
+    const betAmountInput = new TextInputBuilder()
+        .setCustomId('betAmountInput')
+        .setLabel("How much do you want to bet?")
+        .setStyle(TextInputStyle.Short);
+    
+    const firstActionRow = new ActionRowBuilder().addComponents(betAmountInput);
+    betModal.addComponents(firstActionRow);
+
+    return betModal;
+}
+
 // handle the bet interaction
 // if the user's point count is enough place the bet
 export const handleBet = async (interaction, match, userId, betAmount) => {
@@ -103,4 +120,4 @@ export async function handleBetModal(interaction, member, liveGameDetails) {
 }
 
 
-export default {handleBet, handleBetModal};
+export default {createBetModal, handleBet, handleBetModal};

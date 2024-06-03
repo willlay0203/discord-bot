@@ -5,8 +5,8 @@ import getPoints from './commands/getPoints.js';
 import {addTimePoints, addPoints, removeTenPoints } from './utils/points.js';
 import createEmbed from './features/treasure.js';
 import { isInLeagueGame, didWin, timeCheck, hasGameEnded } from './commands/getMatch.js'
-import { handleBet, handleBetModal } from './features/gamble.js';
-import { msgChannel, createBetModal } from './utils/msg.js';
+import { handleBet, handleBetModal, createBetModal } from './features/gamble.js';
+import { msgChannel } from './utils/msg.js';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -108,7 +108,7 @@ async function checkLiveGameDetails() {
     }
   }
 
-// probably not needed for now
+// not needed for now
 // setInterval(checkLiveGameDetails, 180000);
 
 bot.on("messageCreate", async (message) => {
