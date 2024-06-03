@@ -1,6 +1,7 @@
 import { bold, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { hasGameEnded, didWin} from '../commands/getMatch.js'
 import { addPoints, removePoints, pointsEnough } from '../utils/points.js';
+import { msgChannel } from '../utils/msg.js';
 
 // check bet status
 // upon game end return true for successful bet, false for lost bet
@@ -90,7 +91,7 @@ export async function handleBetModal(interaction, member, liveGameDetails) {
                         resolve(betAmount);
                     }
                 } catch (error) {
-                    await modalInteraction.reply('An error occurred while processing your bet.');
+                    msgChannel('An error occured with the modal. Please try again');
                     reject(error);
                 } finally {
                     interaction.client.off('interactionCreate', interactionHandler);

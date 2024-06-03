@@ -83,9 +83,9 @@ export const didWin = async (match, user) => {
             return false;
         }
 
-        if (gameLength <= 500) {
-            return 'remake';
-        }
+        // if (gameLength <= 500) {
+        //     return 'remake';
+        // }
 
         if (participant.win === true) {
             return 'win';
