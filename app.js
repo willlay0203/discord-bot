@@ -204,7 +204,7 @@ bot.on("interactionCreate", async (interaction) => {
         };        
 
         // check that the game hasnt exceeded 3 minutes
-        const timeExceeded = await timeCheck(liveGameDetails.userId, 1800);
+        const timeExceeded = await timeCheck(liveGameDetails.userId, 180);
         if (!timeExceeded) {
             interaction.reply(`Match has already exceeded 5 minutes`);
             return;

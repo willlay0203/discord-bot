@@ -116,15 +116,15 @@ const convertGameTime = async(gameLength) => {
  *  if they are print username, gamemode, and duration
 */
 export const isInLeagueGame = async(message, user) => {
-    //     const id = await findMatchingID(players, user);
+        const id = await findMatchingID(players, user);
 
-    //     if (!id) {
-    //         msgChannel("Invalid username");
-    //         return 0;
-    //     }
+        if (!id) {
+            msgChannel("Invalid username");
+            return 0;
+        }
 
     // use this while testing 
-    const id = await getID('214', 'coe');
+    // const id = await getID('214', 'coe');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -162,7 +162,7 @@ export const isInLeagueGame = async(message, user) => {
             return { gameId: matchData.gameId, id: id, gameTime: gameTime};
         }
 
-        if (matchData.gameLength <= 5000 || matchData.gameLength === 'Loading Screen') {
+        if (matchData.gameLength <= 180 || gameTime === 'Loading Screen') {
             const betWin = new ButtonBuilder()
                 .setCustomId('win')
                 .setLabel('Bet Win')
@@ -183,7 +183,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
         else {
-        await msgChannel(msg);
+        msgChannel(msg);
     }
 
         return { gameId: matchData.gameId, id: id, gameTime: gameTime};
