@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle, time} from 'discord.js';
+import { Client, Events, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, transformResolved, bold, ModalBuilder, TextInputBuilder, TextInputStyle, time, RoleManager} from 'discord.js';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import getPoints from './commands/getPoints.js';
 import {addTimePoints, addPoints, removeTenPoints } from './utils/points.js';
@@ -8,7 +8,7 @@ import { isInLeagueGame, didWin, timeCheck, hasGameEnded } from './commands/getM
 import { handleBet, handleBetModal, createBetModal } from './features/gamble.js';
 import { msgChannel } from './utils/msg.js';
 import { pointsEnough } from './utils/points.js';
-
+import { sortRanks } from './features/rank.js';
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 export const db = new MongoClient(process.env.DB_URI, {
@@ -75,6 +75,8 @@ function eventTimer() {
 
 eventTimer()
 
+setInterval(async () => await sortRanks(), 2 * 60 * 60 * 1000) // Timer every 2 hours
+
 let liveGameDetails = {
     gameId: '',
     userId: '',
@@ -88,7 +90,7 @@ function resetLiveGameDetails() {
       membersBet: []
     };
     console.log('liveGameDetails have been reset');
-  }
+}
 
 bot.on("messageCreate", async (message) => {
     const commandRegex = /^!(\w+)\s*(\w+)?/; 
@@ -97,6 +99,10 @@ bot.on("messageCreate", async (message) => {
     if (content) {
         const command = content[1];
         const argument = content[2] || null;
+
+        if (command === "sortranks") {
+            sortRanks()
+        } 
 
         if (command === "points") { getPoints(message)};
         

@@ -1,7 +1,6 @@
-import {db} from "../app.js";
+import { getAllUsers } from '../db/getAllUsers.js';
 import { bold } from 'discord.js';
 import { msgChannel } from "../utils/msg.js";
-
 
 /**
  * This command sends a sorted list of everyone
@@ -18,12 +17,5 @@ export const points = async (message) => {
     msgChannel(msg);
 }
 
-const getAllUsers = async () => {
-    const res = await db.db("points-db").collection("Users").find(
-        {}, {sort: {points: -1}}
-    );
-
-    return await res.toArray();
-}
 
 export default points;
