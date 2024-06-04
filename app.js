@@ -231,7 +231,7 @@ bot.on("interactionCreate", async (interaction) => {
         }
 
         if (liveGameDetails.membersBet.length === 0) {
-            liveGameDetails.results.unshift("**Final Results**\n");
+            liveGameDetails.results.unshift("**Final Results**");
             const finalMessage = liveGameDetails.results.join('\n');
             msgChannel(finalMessage);
             resetLiveGameDetails();   
