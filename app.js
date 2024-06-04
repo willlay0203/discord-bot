@@ -231,10 +231,10 @@ bot.on("interactionCreate", async (interaction) => {
         }
 
         if (liveGameDetails.membersBet.length === 0) {
+            liveGameDetails.results.unshift("**Final Results**\n");
             const finalMessage = liveGameDetails.results.join('\n');
-            liveGameDetails.results.push("**Final Results**");
             msgChannel(finalMessage);
-            resetLiveGameDetails();            
+            resetLiveGameDetails();   
         }
         
     } catch (error) {
