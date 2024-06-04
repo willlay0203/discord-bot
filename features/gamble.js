@@ -6,8 +6,8 @@ import { msgChannel } from '../utils/msg.js';
 // check bet status
 // upon game end return true for successful bet, false for lost bet
 const checkBet = async (match, predictedResult, userId, member) => {
-    const maxChecks = 30;
-    console.log(`Checking bet for match ${match}`);
+    const maxChecks = 200;
+    // console.log(`Checking bet for match ${match}`);
     
     for (let checkCount = 0; checkCount < maxChecks; checkCount++) {
         const gameOver = await hasGameEnded(match);
@@ -25,8 +25,8 @@ const checkBet = async (match, predictedResult, userId, member) => {
             }
             return false;
         }
-        // Minute checks
-        await new Promise(resolve => setTimeout(resolve, 60 * 1000));
+        // 30 second checks
+        await new Promise(resolve => setTimeout(resolve, 30 * 1000));
     }
     console.log('Maximum checks reached');
     return false;
@@ -103,10 +103,9 @@ export async function handleBetModal(interaction, member, liveGameDetails) {
             setTimeout(() => {
                 interaction.client.off('interactionCreate', interactionHandler);
                 reject('Timeout waiting for interaction');
-            }, 60000);
+            }, 10000);
         });
 
-        console.log(`Bet amount resolved: ${betAmount}`);
         return betAmount;
     } catch (error) {
         if (error === 'Timeout waiting for interaction') {

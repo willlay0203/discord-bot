@@ -129,7 +129,7 @@ export const isInLeagueGame = async(message, user) => {
         }
 
     // use this while testing 
-    // const id = await getID('', 'OCE');
+    // const id = await getID('tac', 'OCE');
     const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
     try {
         const response = await fetch(requestUrl);
@@ -158,7 +158,7 @@ export const isInLeagueGame = async(message, user) => {
         };
 
         const gameTime = await convertGameTime(matchData.gameLength);
-        const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n`;
+        const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n*If you change your mind (ie win to loss) please wait 10 seconds before submitting*\n`;
         console.log(data.gameLength);
         // if (gameTime === 'Loading Screen') {
         //     await message.channel.send({
@@ -204,7 +204,7 @@ export const isInLeagueGame = async(message, user) => {
 // Assume the game is over if the match data contains the game end timestamp
 export const hasGameEnded = async (match) => {
     try {
-        console.log(`Checking if game has ended for ${match}`);
+        // console.log(`Checking if game has ended for ${match}`);
         const requestUrl = `${MATCHID_URL}/lol/match/v5/matches/${match}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
@@ -224,7 +224,7 @@ export const timeCheck = async (id, time) => {
         const requestUrl = `${MATCH_REGION_URL}/lol/spectator/v5/active-games/by-summoner/${id}/?api_key=${LOL_API_KEY}`;
         const response = await fetch(requestUrl);
         const data = await response.json();
-        console.log(`Game is currently ${data.gameLength} seconds in progress`);
+        // console.log(`Game is currently ${data.gameLength} seconds in progress`);
         if (data.gameLength < time) {
             return true;
         }
