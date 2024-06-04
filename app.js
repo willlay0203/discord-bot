@@ -78,14 +78,16 @@ eventTimer()
 let liveGameDetails = {
     gameId: '',
     userId: '',
-    membersBet: []
+    membersBet: [],
+    results: []
 };
 
 function resetLiveGameDetails() {
     liveGameDetails = {
       gameId: '',
       userId: '',
-      membersBet: []
+      membersBet: [],
+      results: []
     };
     console.log('liveGameDetails have been reset');
   }
@@ -209,24 +211,32 @@ bot.on("interactionCreate", async (interaction) => {
 
         if (betResult === true) {
             const msg = `${bold(member.user.displayName)} won ${betAmount * 2} petar points`;
-            msgChannel(msg);
+            liveGameDetails.results.push(msg);
+            liveGameDetails.membersBet = liveGameDetails.membersBet.filter(id => id !== member.id);
             console.log(`${member.user.displayName} Bet won`);
         }
 
         if (betResult === 'remake') {
             const msg = `Game was a remake. ${bold(member.user.displayName)} was refunded ${betAmount} petar points`;
-            msgChannel(msg);
+            liveGameDetails.results.push(msg);
+            liveGameDetails.membersBet = liveGameDetails.membersBet.filter(id => id !== member.id);
             console.log(`${member.user.displayName} Bet remake`);   
         }
         
         if (betResult === false) {
             const msg = `${bold(member.user.displayName)} lost ${betAmount} petar points`;
-            msgChannel(msg);
+            liveGameDetails.results.push(msg);
+            liveGameDetails.membersBet = liveGameDetails.membersBet.filter(id => id !== member.id);
             console.log(`${member.user.displayName} Bet lost`);
         }
 
-        resetLiveGameDetails();
-    
+        if (liveGameDetails.membersBet.length === 0) {
+            const finalMessage = liveGameDetails.results.join('\n');
+            liveGameDetails.results.push("**Final Results**");
+            msgChannel(finalMessage);
+            resetLiveGameDetails();            
+        }
+        
     } catch (error) {
         console.error('Error handling bet:', error);
         await interaction.followUp(`An error occurred while processing your bet. Please try again later.`);
