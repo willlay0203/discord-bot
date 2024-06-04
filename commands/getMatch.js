@@ -158,7 +158,7 @@ export const isInLeagueGame = async(message, user) => {
         };
 
         const gameTime = await convertGameTime(matchData.gameLength);
-        const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n*If you change your mind (ie win to loss) please wait 10 seconds before submitting*\n`;
+        const msg = `**Username:** ${matchData.userName} \n**Game Mode:** ${matchData.gameMode} \n**Game Duration:** ${gameTime}\n*If you change your mind (ie win to loss) please wait 10 seconds before betting*\n`;
         console.log(data.gameLength);
         // if (gameTime === 'Loading Screen') {
         //     await message.channel.send({
